@@ -35,8 +35,7 @@ class _RideHistoryState extends State<RideHistory> {
           )),
       onPressed: () {
         print(lists[index]['ownerId']);
-        dbref = FirebaseDatabase.instance.reference().child(
-            "user_history/${currentFirebaseUser.uid}/${lists[index]['ownerId']}");
+        dbref = FirebaseDatabase.instance.reference().child("user_history/${currentFirebaseUser.uid}/${lists[index]['ownerId']}");
         dbref.onDisconnect();
         dbref.remove();
         // Navigator.pop(context);
@@ -70,9 +69,7 @@ class _RideHistoryState extends State<RideHistory> {
 
   @override
   void initState() {
-    dbref = FirebaseDatabase.instance
-        .reference()
-        .child("user_history/${currentFirebaseUser.uid}");
+    dbref = FirebaseDatabase.instance.reference().child("user_history/${currentFirebaseUser.uid}");
     super.initState();
   }
 
@@ -148,14 +145,12 @@ class _RideHistoryState extends State<RideHistory> {
                               Text('From\t\t'),
                               Text(
                                 lists[index]["pickupDate"],
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 14),
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                               ),
                               Text('\t\tTo\t\t'),
                               Text(
                                 lists[index]["dropofDate"],
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 14),
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                               ),
                             ],
                           ),
@@ -167,13 +162,10 @@ class _RideHistoryState extends State<RideHistory> {
                               Text('Amount Paid:\t\t'),
                               Text(
                                 '₹ ${lists[index]["amount"]}\t\t\t',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 14),
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                               ),
                               Icon(Icons.check_circle),
-                              SizedBox(
-                                width: 50,
-                              ),
+                              Spacer(),
                               GestureDetector(
                                 onTap: () {
                                   showAlertDialog(context, index);

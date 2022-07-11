@@ -121,7 +121,7 @@ class _SearchDropOffLocationState extends State<SearchDropOffLocation> {
 
   void findPlace(String placeName) async {
     if (placeName.length > 0) {
-      String autoCompleteUrl = 'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$placeName&key=$geocodingApi&components=country:in';
+      String autoCompleteUrl = 'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$placeName&key=$geocodingApi&components=country:eg';
       var res = await RequestAssistant.getRequest(autoCompleteUrl);
 
       if (res == 'failed') {
