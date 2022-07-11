@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
@@ -10,13 +13,16 @@ import 'package:provider/provider.dart';
 import 'package:vehicle_sharing_app/assistant/assistantMethods.dart';
 import 'package:vehicle_sharing_app/dataHandler/appdata.dart';
 import 'package:vehicle_sharing_app/models/directionDetails.dart';
+import 'package:vehicle_sharing_app/models/station_model.dart';
 import 'package:vehicle_sharing_app/models/user.dart';
+import 'package:vehicle_sharing_app/notifier/station_bloc.dart';
 import 'package:vehicle_sharing_app/screens/about_us.dart';
 import 'package:vehicle_sharing_app/screens/car_list.dart';
 import 'package:vehicle_sharing_app/screens/profile_page.dart';
 import 'package:vehicle_sharing_app/screens/ride_history_page.dart';
 import 'package:vehicle_sharing_app/services/authentication_service.dart';
 import 'package:vehicle_sharing_app/services/firebase_services.dart';
+import 'package:vehicle_sharing_app/widgets/single_station.dart';
 import 'package:vehicle_sharing_app/widgets/widgets.dart';
 
 import '../assistant/fireHelper.dart';
@@ -24,7 +30,6 @@ import '../globalvariables.dart';
 import '../models/nearbyCar.dart';
 import 'login_page.dart';
 import 'owner_homePage.dart';
-import 'search_dropOff.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -32,6 +37,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
+  List<StationModel> _stations = [];
+  StationModel _selectedStation;
+
   Completer<GoogleMapController> _controllerGoogleMap = Completer();
   GoogleMapController newGoogleMapController;
 
@@ -86,10 +94,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void locatePosition() async {
     Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.bestForNavigation);
     currentPosition = position;
-    LatLng latlngPosition = LatLng(position.latitude, position.longitude);
 
-    CameraPosition cameraPosition = new CameraPosition(target: latlngPosition, zoom: 14);
-    newGoogleMapController.moveCamera(CameraUpdate.newCameraPosition(cameraPosition));
+    // TODO: remove this hardcoded address for MSA location
+    LatLng latlngPosition = LatLng(29.9567052, 30.9557575);
+    // LatLng latlngPosition = LatLng(position.latitude, position.longitude);
+
+    CameraPosition cameraPosition = new CameraPosition(target: latlngPosition, zoom: 13.5);
+
+    if (newGoogleMapController != null) {
+      newGoogleMapController.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+    }
 
     String address = await AssistantMethods.searchCoordinateAddress(position, context);
     if (address == '') {
@@ -100,10 +114,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   void startGeofireListener() {
-    // print(currentPosition);
     Geofire.initialize('carsAvailable');
     Geofire.queryAtLocation(currentPosition.latitude, currentPosition.longitude, 20).listen((map) {
-      // print(map);
       if (map != null) {
         var callBack = map['callBack'];
 
@@ -155,58 +167,42 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   );
   AppUser userData;
 
-  DateTime selectedPickupDate = DateTime.now();
-  DateTime selectedDropOffDate = DateTime.now();
-
-  bool _decideWhichDayToEnable(DateTime day) {
-    if ((day.isAfter(DateTime.now().subtract(Duration(days: 1))) && day.isBefore(DateTime.now().add(Duration(days: 10))))) {
-      return true;
-    }
-    return false;
+  Future<Uint8List> _getBytesFromAsset(String path, int width) async {
+    ByteData data = await rootBundle.load(path);
+    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(), targetWidth: width);
+    ui.FrameInfo fi = await codec.getNextFrame();
+    return (await fi.image.toByteData(format: ui.ImageByteFormat.png)).buffer.asUint8List();
   }
 
-  _selectPickupDate(BuildContext context) async {
-    final DateTime picked = await showDatePicker(
-      context: context,
-      initialDate: selectedPickupDate, // Refer step 1
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2025),
-      initialEntryMode: DatePickerEntryMode.input,
-      selectableDayPredicate: _decideWhichDayToEnable,
-      helpText: 'Select pickup date', // Can be used as title
-      cancelText: 'Not now',
-      confirmText: 'Done',
-      errorFormatText: 'Enter valid date',
-      errorInvalidText: 'Enter date in valid range',
-      fieldLabelText: 'Pickup date',
-      fieldHintText: 'Month/Date/Year',
-    );
-    if (picked != null && picked != selectedPickupDate)
-      setState(() {
-        selectedPickupDate = picked;
-      });
-  }
+  void _onMapCreated(GoogleMapController controller, List<StationModel> stations) async {
+    _controllerGoogleMap.complete(controller);
+    newGoogleMapController = controller;
 
-  _selectDropOffDate(BuildContext context) async {
-    final DateTime picked = await showDatePicker(
-      context: context,
-      initialDate: selectedDropOffDate, // Refer step 1
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2025),
-      initialEntryMode: DatePickerEntryMode.input,
-      selectableDayPredicate: _decideWhichDayToEnable,
-      helpText: 'Select dropOff date', // Can be used as title
-      cancelText: 'Not now',
-      confirmText: 'Done',
-      errorFormatText: 'Enter valid date',
-      errorInvalidText: 'Enter date in valid range',
-      fieldLabelText: 'DropOff date',
-      fieldHintText: 'Month/Date/Year',
+    final iconByteData = await _getBytesFromAsset(
+      'images/bike_marker.png',
+      230,
     );
-    if (picked != null && picked != selectedDropOffDate)
-      setState(() {
-        selectedDropOffDate = picked;
-      });
+
+    setState(() {
+      bottomPaddingOfMap = 300;
+
+      for (final station in stations) {
+        markerSet.add(
+          Marker(
+            markerId: MarkerId(station.lat.toString() + station.long.toString()),
+            position: LatLng(double.parse(station.lat), double.parse(station.long)),
+            onTap: () {
+              setState(() {
+                _selectedStation = station;
+              });
+            },
+            icon: BitmapDescriptor.fromBytes(iconByteData),
+          ),
+        );
+      }
+    });
+
+    locatePosition();
   }
 
   @override
@@ -285,23 +281,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) {
-                      return DisplayMap();
-                    }),
-                  );
-                },
-                child: ListTile(
-                  leading: Icon(Icons.directions_car_rounded),
-                  title: Text(
-                    'Give my car on rent',
-                    style: TextStyle(fontSize: 14),
-                  ),
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) {
                       return RideHistory();
                     }),
                   );
@@ -310,24 +289,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   leading: Icon(Icons.history),
                   title: Text(
                     'History',
-                    // style: TextStyle(fontSize: 16),
-                  ),
-                ),
-              ),
-
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) {
-                      return AboutUs();
-                    }),
-                  );
-                },
-                child: ListTile(
-                  leading: Icon(Icons.info_outline_rounded),
-                  title: Text(
-                    'About us',
                     // style: TextStyle(fontSize: 16),
                   ),
                 ),
@@ -354,402 +315,584 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ),
         ),
       ),
-      body: Stack(
-        children: [
-          GoogleMap(
-            padding: EdgeInsets.only(bottom: bottomPaddingOfMap),
-            mapType: MapType.normal,
-            myLocationButtonEnabled: true,
-            initialCameraPosition: _kGooglePlex,
-            myLocationEnabled: true,
-            zoomControlsEnabled: true,
-            zoomGesturesEnabled: true,
-            compassEnabled: true,
-            polylines: polylineSet,
-            markers: markerSet,
-            circles: circleSet,
-            onMapCreated: (GoogleMapController controller) {
-              _controllerGoogleMap.complete(controller);
-              newGoogleMapController = controller;
-              setState(() {
-                bottomPaddingOfMap = 300;
-              });
-              locatePosition();
-            },
-          ),
-          //Hamburger button for Drawer
-          Positioned(
-            top: 45,
-            left: 15,
-            child: GestureDetector(
-              onTap: () {
-                if (drawerOpen) {
-                  scaffoldKey.currentState.openDrawer();
-                } else {
-                  resetApp();
-                }
-              },
-              child: Container(
-                child: CircleAvatar(
-                  backgroundColor: Colors.white,
-                  child: Icon(
-                    ((drawerOpen) ? Icons.menu : Icons.close),
-                    color: Colors.black,
+      body: FutureBuilder(
+        future: FirebaseFunctions().getStations(),
+        builder: (BuildContext context, AsyncSnapshot<List<StationModel>> snapshot) {
+          if (snapshot.hasData) {
+            _stations = snapshot.data;
+            return Stack(
+              children: [
+                GoogleMap(
+                  padding: EdgeInsets.only(bottom: bottomPaddingOfMap),
+                  mapType: MapType.normal,
+                  myLocationButtonEnabled: true,
+                  initialCameraPosition: _kGooglePlex,
+                  myLocationEnabled: false,
+                  zoomControlsEnabled: true,
+                  zoomGesturesEnabled: true,
+                  compassEnabled: true,
+                  polylines: polylineSet,
+                  markers: markerSet,
+                  circles: circleSet,
+                  onMapCreated: (GoogleMapController controller) {
+                    _onMapCreated(controller, _stations);
+                  },
+                ),
+                //Hamburger button for Drawer
+                Positioned(
+                  top: 45,
+                  left: 15,
+                  child: GestureDetector(
+                    onTap: () {
+                      if (drawerOpen) {
+                        scaffoldKey.currentState.openDrawer();
+                      } else {
+                        resetApp();
+                      }
+                    },
+                    child: Container(
+                      child: CircleAvatar(
+                        backgroundColor: Colors.white,
+                        child: Icon(
+                          ((drawerOpen) ? Icons.menu : Icons.close),
+                          color: Colors.black,
+                        ),
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(22),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black,
+                            blurRadius: 6,
+                            spreadRadius: 0.5,
+                            offset: Offset(0.7, 0.7),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(22),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black,
-                      blurRadius: 6,
-                      spreadRadius: 0.5,
-                      offset: Offset(0.7, 0.7),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: AnimatedSize(
-              vsync: this,
-              curve: Curves.bounceIn,
-              duration: Duration(milliseconds: 500),
-              child: Container(
-                height: searchDetailContainerHeight,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(5),
-                    topRight: Radius.circular(5),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black54,
-                      blurRadius: 16,
-                      spreadRadius: 0.2,
-                      offset: Offset(1, 1),
-                    ),
-                  ],
-                ),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Hi there,',
-                        style: TextStyle(fontSize: 11),
-                      ),
-                      Text(
-                        'Hoping to?',
-                        style: TextStyle(fontSize: 13),
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      GestureDetector(
-                        onTap: () async {
-                          var res = await Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) {
-                              return SearchDropOffLocation();
-                            }),
-                          );
-                          if (res == 'obtainDirection') {
-                            displayRideDetailContainer();
-                          }
-                        },
-                        child: Container(
-                          child: Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Row(
-                              children: [
-                                Icon(Icons.search),
-                                Text(
-                                  '\t\tDrop off location',
-                                  style: TextStyle(fontSize: 14, color: Colors.black54),
-                                ),
-                              ],
+
+                if (!Provider.of<StationBloc>(context).isStartStationSelected)
+                  Positioned(
+                    bottom: 120,
+                    right: 0,
+                    left: 0,
+                    child: _selectedStation == null
+                        ? SizedBox.shrink()
+                        : Opacity(
+                            opacity: 1,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                              child: SingleStation(
+                                station: _selectedStation,
+                                onTap: () {
+                                  Provider.of<StationBloc>(context, listen: false).setSelectedStartStation(_selectedStation);
+                                  Provider.of<StationBloc>(context, listen: false).isStartStationSelected = true;
+
+                                  setState(() {
+                                    _selectedStation = null;
+                                  });
+                                },
+                              ),
                             ),
                           ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(5),
+                  ),
+
+                if (Provider.of<StationBloc>(context).isStartStationSelected && !Provider.of<StationBloc>(context).isEndStationSelected)
+                  Positioned(
+                    bottom: 120,
+                    right: 0,
+                    left: 0,
+                    child: _selectedStation == null
+                        ? SizedBox.shrink()
+                        : Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            child: SingleStation(
+                              station: _selectedStation,
+                              onTap: () {
+                                if (Provider.of<StationBloc>(context, listen: false).selectedStartStation.stationNumber != _selectedStation.stationNumber) {
+                                  Provider.of<StationBloc>(context, listen: false).setSelectedEndStation(_selectedStation);
+                                  Provider.of<StationBloc>(context, listen: false).isEndStationSelected = true;
+
+                                  setState(() {
+                                    _selectedStation = null;
+                                  });
+                                } else {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                        title: Text('Error'),
+                                        content: Text('You cannot select the same station as start and end station'),
+                                        actions: [
+                                          FlatButton(
+                                            child: Text('Ok'),
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                }
+
+                                setState(() {
+                                  _selectedStation = null;
+                                });
+                                getPlaceDirection();
+                              },
                             ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black54,
-                                blurRadius: 4,
-                                spreadRadius: 0.2,
-                                offset: Offset(0.7, 0.7),
+                          ),
+                  ),
+
+                // Start station
+                if (!Provider.of<StationBloc>(context).isStartStationSelected)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: AnimatedSize(
+                      vsync: this,
+                      curve: Curves.bounceIn,
+                      duration: Duration(milliseconds: 500),
+                      child: Container(
+                        height: 100,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(5),
+                            topRight: Radius.circular(5),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black54,
+                              blurRadius: 16,
+                              spreadRadius: 0.2,
+                              offset: Offset(1, 1),
+                            ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Pick Start Station',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              Text(
+                                'Pick the station Closest to you to start your awesome journey.',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.black54,
+                                ),
                               ),
                             ],
                           ),
                         ),
                       ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Container(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Icon(Icons.home),
-                            SizedBox(
-                              width: 20,
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  child: Text(
-                                    Provider.of<AppData>(context).pickUpLocation != null ? (Provider.of<AppData>(context).pickUpLocation.placeName.length > 40 ? Provider.of<AppData>(context).pickUpLocation.placeName.substring(0, 41) + '\n' + Provider.of<AppData>(context).pickUpLocation.placeName.substring(41) : Provider.of<AppData>(context).pickUpLocation.placeName) : 'Add Home',
-                                    style: TextStyle(fontSize: 12),
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1,
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: 4,
-                                ),
-                                Text(
-                                  'Your home address',
-                                  style: TextStyle(fontSize: 11, color: Colors.black54),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: AnimatedSize(
-              vsync: this,
-              curve: Curves.bounceIn,
-              duration: Duration(milliseconds: 500),
-              child: Container(
-                height: rideDetailContainerHeight,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(5),
-                    topRight: Radius.circular(5),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black54,
-                      blurRadius: 16,
-                      spreadRadius: 0.2,
-                      offset: Offset(1, 1),
-                    ),
-                  ],
-                ),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-                  child: SingleChildScrollView(
-                    physics: BouncingScrollPhysics(),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          ((initialLocation != '') ? initialLocation : ''),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Text('To'),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          ((finalDestination != '') ? finalDestination : ''),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Row(
-                              children: [
-                                Text(
-                                  'Total Ride - \t',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                  ),
-                                ),
-                                Text(
-                                  ((tripDirectionDetails != null) ? tripDirectionDetails.distanceText : ''),
-                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  'Cost of Ride - \t',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                  ),
-                                ),
-                                Text(
-                                  ((tripDirectionDetails != null) ? '₹ ${AssistantMethods.calculateFares(tripDirectionDetails)}' : ''),
-                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        Divider(),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  "${selectedPickupDate.toLocal()}".split(' ')[0],
-                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                                ),
-                                SizedBox(
-                                  height: 10.0,
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    _selectPickupDate(context);
-                                  },
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.grey,
-                                          blurRadius: 10,
-                                        ),
-                                      ],
-                                      borderRadius: BorderRadius.all(Radius.circular(8)),
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        'Select PickUp Date',
-                                        style: TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                            SizedBox(
-                              width: 20,
-                            ),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  "${selectedDropOffDate.toLocal()}".split(' ')[0],
-                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                                ),
-                                SizedBox(
-                                  height: 10.0,
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    _selectDropOffDate(context);
-                                  },
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.grey,
-                                          blurRadius: 10,
-                                        ),
-                                      ],
-                                      borderRadius: BorderRadius.all(Radius.circular(8)),
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        'Select DropOff Date',
-                                        style: TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 30,
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) {
-                                return CarList(
-                                  initialLocation: initialLocation,
-                                  finalDestination: finalDestination,
-                                  carlist: nearbyCarId,
-                                  cost: ((tripDirectionDetails != null) ? AssistantMethods.calculateFares(tripDirectionDetails) : 0),
-                                  pickupDate: "${selectedPickupDate.toLocal()}".split(' ')[0],
-                                  dropOffDate: "${selectedDropOffDate.toLocal()}".split(' ')[0],
-                                );
-                              }),
-                            );
-                          },
-                          child: CustomButton(
-                            text: 'Next',
-                          ),
-                        ),
-                      ],
                     ),
                   ),
-                ),
-              ),
-            ),
-          ),
-        ],
+
+                // End station
+                if (Provider.of<StationBloc>(context).isStartStationSelected && !Provider.of<StationBloc>(context).isEndStationSelected)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: AnimatedSize(
+                      vsync: this,
+                      curve: Curves.bounceIn,
+                      duration: Duration(milliseconds: 500),
+                      child: Container(
+                        height: 100,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(5),
+                            topRight: Radius.circular(5),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black54,
+                              blurRadius: 16,
+                              spreadRadius: 0.2,
+                              offset: Offset(1, 1),
+                            ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Pick End Station',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              Text(
+                                'Pick the closest station to your destination.',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                // Positioned(
+                //   left: 0,
+                //   right: 0,
+                //   bottom: 0,
+                //   child: AnimatedSize(
+                //     vsync: this,
+                //     curve: Curves.bounceIn,
+                //     duration: Duration(milliseconds: 500),
+                //     child: Container(
+                //       height: searchDetailContainerHeight,
+                //       decoration: BoxDecoration(
+                //         color: Colors.white,
+                //         borderRadius: BorderRadius.only(
+                //           topLeft: Radius.circular(5),
+                //           topRight: Radius.circular(5),
+                //         ),
+                //         boxShadow: [
+                //           BoxShadow(
+                //             color: Colors.black54,
+                //             blurRadius: 16,
+                //             spreadRadius: 0.2,
+                //             offset: Offset(1, 1),
+                //           ),
+                //         ],
+                //       ),
+                //       child: Padding(
+                //         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                //         child: Column(
+                //           crossAxisAlignment: CrossAxisAlignment.start,
+                //           children: [
+                //             Text(
+                //               'Hi there,',
+                //               style: TextStyle(fontSize: 11),
+                //             ),
+                //             Text(
+                //               'Hoping to?',
+                //               style: TextStyle(fontSize: 13),
+                //             ),
+                //             SizedBox(
+                //               height: 20,
+                //             ),
+                //             GestureDetector(
+                //               onTap: () async {
+                //                 var res = await Navigator.push(
+                //                   context,
+                //                   MaterialPageRoute(builder: (context) {
+                //                     return SearchDropOffLocation();
+                //                   }),
+                //                 );
+                //                 if (res == 'obtainDirection') {
+                //                   displayRideDetailContainer();
+                //                 }
+                //               },
+                //               child: Container(
+                //                 child: Padding(
+                //                   padding: EdgeInsets.all(8.0),
+                //                   child: Row(
+                //                     children: [
+                //                       Icon(Icons.search),
+                //                       Text(
+                //                         '\t\tDrop off location',
+                //                         style: TextStyle(fontSize: 14, color: Colors.black54),
+                //                       ),
+                //                     ],
+                //                   ),
+                //                 ),
+                //                 decoration: BoxDecoration(
+                //                   color: Colors.white,
+                //                   borderRadius: BorderRadius.all(
+                //                     Radius.circular(5),
+                //                   ),
+                //                   boxShadow: [
+                //                     BoxShadow(
+                //                       color: Colors.black54,
+                //                       blurRadius: 4,
+                //                       spreadRadius: 0.2,
+                //                       offset: Offset(0.7, 0.7),
+                //                     ),
+                //                   ],
+                //                 ),
+                //               ),
+                //             ),
+                //             SizedBox(
+                //               height: 20,
+                //             ),
+                //             Container(
+                //               child: Row(
+                //                 mainAxisAlignment: MainAxisAlignment.start,
+                //                 children: [
+                //                   Icon(Icons.home),
+                //                   SizedBox(
+                //                     width: 20,
+                //                   ),
+                //                   Column(
+                //                     crossAxisAlignment: CrossAxisAlignment.start,
+                //                     children: [
+                //                       Container(
+                //                         child: Text(
+                //                           Provider.of<AppData>(context).pickUpLocation != null ? (Provider.of<AppData>(context).pickUpLocation.placeName.length > 40 ? Provider.of<AppData>(context).pickUpLocation.placeName.substring(0, 41) + '\n' + Provider.of<AppData>(context).pickUpLocation.placeName.substring(41) : Provider.of<AppData>(context).pickUpLocation.placeName) : 'Add Home',
+                //                           style: TextStyle(fontSize: 12),
+                //                           overflow: TextOverflow.ellipsis,
+                //                           maxLines: 1,
+                //                         ),
+                //                       ),
+                //                       SizedBox(
+                //                         height: 4,
+                //                       ),
+                //                       Text(
+                //                         'Your home address',
+                //                         style: TextStyle(fontSize: 11, color: Colors.black54),
+                //                       ),
+                //                     ],
+                //                   ),
+                //                 ],
+                //               ),
+                //             ),
+                //           ],
+                //         ),
+                //       ),
+                //     ),
+                //   ),
+                // ),
+
+                if (Provider.of<StationBloc>(context).isStartStationSelected && Provider.of<StationBloc>(context).isEndStationSelected)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: AnimatedSize(
+                      vsync: this,
+                      curve: Curves.bounceIn,
+                      duration: Duration(milliseconds: 500),
+                      child: Container(
+                        height: 300,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(5),
+                            topRight: Radius.circular(5),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black54,
+                              blurRadius: 16,
+                              spreadRadius: 0.2,
+                              offset: Offset(1, 1),
+                            ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+                          child: SingleChildScrollView(
+                            physics: BouncingScrollPhysics(),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: RichText(
+                                    text: TextSpan(
+                                      children: [
+                                        TextSpan(
+                                          text: 'Station: ${Provider.of<StationBloc>(context).selectedStartStation.stationNumber}',
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            color: Colors.grey[700],
+                                          ),
+                                        ),
+                                        TextSpan(
+                                          text: '\n${Provider.of<StationBloc>(context).selectedStartStation.address}',
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 5,
+                                ),
+                                Text(
+                                  'To',
+                                  style: TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.green,
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 5,
+                                ),
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: RichText(
+                                    text: TextSpan(
+                                      children: [
+                                        TextSpan(
+                                          text: 'Station: ${Provider.of<StationBloc>(context).selectedEndStation.stationNumber}',
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            color: Colors.grey[700],
+                                          ),
+                                        ),
+                                        TextSpan(
+                                          text: '\n${Provider.of<StationBloc>(context).selectedEndStation.address}',
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 20,
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                          'Total Ride - \t',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                          ),
+                                        ),
+                                        Text(
+                                          ((tripDirectionDetails != null) ? tripDirectionDetails.distanceText : ''),
+                                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          'Cost of Ride - \t',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                          ),
+                                        ),
+                                        Text(
+                                          ((tripDirectionDetails != null) ? '\$ ${AssistantMethods.calculateFares(tripDirectionDetails)}' : ''),
+                                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 20,
+                                ),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          print('Tapped');
+
+                                          Provider.of<StationBloc>(context, listen: false).setSelectedStartStation(null);
+                                          Provider.of<StationBloc>(context, listen: false).setSelectedEndStation(null);
+                                          Provider.of<StationBloc>(context, listen: false).isStartStationSelected = false;
+                                          Provider.of<StationBloc>(context, listen: false).isEndStationSelected = false;
+
+                                          setState(() {
+                                            _selectedStation = null;
+
+                                            polylineSet.clear();
+                                            pLinesCoordinates.clear();
+                                            circleSet.clear();
+                                          });
+                                        },
+                                        child: CustomButton(
+                                          text: 'Reset',
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 10,
+                                    ),
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(builder: (context) {
+                                              // return CarList(
+                                              //   initialLocation: initialLocation,
+                                              //   finalDestination: finalDestination,
+                                              //   carlist: nearbyCarId,
+                                              //   cost: ((tripDirectionDetails != null) ? AssistantMethods.calculateFares(tripDirectionDetails) : 0),
+                                              //   pickupDate: "${selectedPickupDate.toLocal()}".split(' ')[0],
+                                              //   dropOffDate: "${selectedDropOffDate.toLocal()}".split(' ')[0],
+                                              // );
+                                            }),
+                                          );
+                                        },
+                                        child: CustomButton(
+                                          text: 'Next',
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          }
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        },
       ),
     );
   }
 
   Future<void> getPlaceDirection() async {
-    var initialPos = Provider.of<AppData>(context, listen: false).pickUpLocation;
-    var finalPos = Provider.of<AppData>(context, listen: false).dropOffLocation;
+    final iconByteData = await _getBytesFromAsset(
+      'images/bike_marker.png',
+      230,
+    );
 
-    var pickUpLatLng = LatLng(initialPos.latitude, initialPos.longitude);
-    var dropOffLatLng = LatLng(finalPos.latitude, finalPos.longitude);
+    var initialPos = Provider.of<StationBloc>(context, listen: false).selectedStartStation;
+    var finalPos = Provider.of<StationBloc>(context, listen: false).selectedEndStation;
+
+    var pickUpLatLng = LatLng(double.parse(initialPos.lat), double.parse(initialPos.long));
+    var dropOffLatLng = LatLng(double.parse(finalPos.lat), double.parse(finalPos.long));
 
     showDialog(
       context: context,
@@ -759,13 +902,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     var details = await AssistantMethods.obtainPlaceDirectionDetails(pickUpLatLng, dropOffLatLng);
     setState(() {
       tripDirectionDetails = details;
-      finalDestination = finalPos.placeName;
-      initialLocation = initialPos.placeName;
+      finalDestination = finalPos.address;
+      initialLocation = initialPos.address;
     });
 
     Navigator.pop(context);
-    // print('encoded points::');
-    // print(details.encodedPoints);
 
     PolylinePoints polylinePoints = PolylinePoints();
 
@@ -819,15 +960,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         );
 
         Marker pickUpLocMarker = Marker(
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-          infoWindow: InfoWindow(title: initialPos.placeName, snippet: 'PickUp'),
+          icon: BitmapDescriptor.fromBytes(iconByteData),
+          infoWindow: InfoWindow(title: initialPos.address, snippet: 'PickUp'),
           position: pickUpLatLng,
           markerId: MarkerId('pickUpId'),
         );
 
         Marker dropOffLocMarker = Marker(
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-          infoWindow: InfoWindow(title: finalPos.placeName, snippet: 'DropOff'),
+          icon: BitmapDescriptor.fromBytes(iconByteData),
+          infoWindow: InfoWindow(title: finalPos.address, snippet: 'DropOff'),
           position: dropOffLatLng,
           markerId: MarkerId('dropOffId'),
         );

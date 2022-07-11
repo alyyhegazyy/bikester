@@ -10,6 +10,8 @@ import 'package:vehicle_sharing_app/screens/home_page.dart';
 import 'package:vehicle_sharing_app/screens/login_page.dart';
 import 'package:vehicle_sharing_app/services/authentication_service.dart';
 
+import 'notifier/station_bloc.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -41,6 +43,7 @@ class MyApp extends StatelessWidget {
       providers: [
         Provider<AuthenticationService>(create: (_) => AuthenticationService(FirebaseAuth.instance)),
         ChangeNotifierProvider(create: (_) => AppData()),
+        ChangeNotifierProvider(create: (_) => StationBloc()),
         StreamProvider(create: (context) => context.read<AuthenticationService>().authStateChanges),
       ],
       child: MaterialApp(

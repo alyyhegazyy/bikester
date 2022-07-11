@@ -12,7 +12,9 @@ class AssistantMethods {
     String placeAddress = '';
 
     String add1, add2, add3, add4;
-    String url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=$geocodingApi';
+    // TODO: remove this hardcoded address for MSA location
+    // String url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=$geocodingApi';
+    String url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=29.9567052,30.9557575&key=$geocodingApi';
 
     var response = await RequestAssistant.getRequest(url);
 
@@ -56,10 +58,8 @@ class AssistantMethods {
     return directionDetails;
   }
 
-  static int calculateFares(DirectionDetails directionDetails) {
-    double timeTraveledFare = (directionDetails.durationValue / 60) * 0.20;
-    double distanceTraveledFare = (directionDetails.distanceValue / 1000) * 26;
-    double totalFareAmount = (timeTraveledFare + distanceTraveledFare);
-    return totalFareAmount.truncate();
+  static String calculateFares(DirectionDetails directionDetails) {
+    double distanceTraveledFare = (directionDetails.distanceValue / 1000) * 3;
+    return distanceTraveledFare.toStringAsFixed(2);
   }
 }

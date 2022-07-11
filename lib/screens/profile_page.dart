@@ -40,9 +40,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          context
-                              .read<AuthenticationService>()
-                              .signOut(context);
+                          context.read<AuthenticationService>().signOut(context);
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) {
@@ -89,24 +87,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 width: MediaQuery.of(context).size.width,
                 child: ListView(
                   children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) {
-                            return OwnerHistory();
-                          }),
-                        );
-                      },
-                      child: ListTile(
-                        leading: Icon(Icons.money_rounded),
-                        title: Text(
-                          'My Earnings',
-                          style: TextStyle(fontSize: 14),
-                        ),
-                        trailing: Icon(Icons.arrow_forward_ios_rounded),
-                      ),
-                    ),
                     GestureDetector(
                       onTap: () {
                         Navigator.push(

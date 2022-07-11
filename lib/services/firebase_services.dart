@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:vehicle_sharing_app/globalvariables.dart';
+import 'package:vehicle_sharing_app/models/station_model.dart';
 import 'package:vehicle_sharing_app/models/user.dart';
 import 'dart:io';
 import 'package:uuid/uuid.dart';
@@ -109,5 +110,20 @@ class FirebaseFunctions {
       // print(decodedData);
       return decodedData;
     }
+  }
+
+  Future<List<StationModel>> getStations() async {
+    List<StationModel> stations = [];
+
+    final stationsDoc = await FirebaseFirestore.instance.collection('stations').get();
+
+    if (stationsDoc.docs.isNotEmpty) {
+      for (var doc in stationsDoc.docs) {
+        final stationData = doc.data();
+        final decodedData = StationModel.fromMap(stationData);
+        stations.add(decodedData);
+      }
+    }
+    return stations;
   }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:vehicle_sharing_app/models/user.dart';
+import 'package:vehicle_sharing_app/notifier/station_bloc.dart';
 import 'package:vehicle_sharing_app/screens/home_page.dart';
 import 'package:vehicle_sharing_app/widgets/widgets.dart';
 
@@ -37,25 +39,21 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 SizedBox(
                   height: 20,
                 ),
-                Info(
-                    infoText: 'Name: ', infoData: widget.docSnapshot.data.name),
-                Info(
-                    infoText: 'Email ID: ',
-                    infoData: widget.docSnapshot.data.emailID),
-                Info(
-                    infoText: 'Blood group: ',
-                    infoData: widget.docSnapshot.data.bloodGroup),
-                Info(
-                    infoText: 'Contact number: ',
-                    infoData: widget.docSnapshot.data.contact),
-                Info(
-                    infoText: 'License number: ',
-                    infoData: widget.docSnapshot.data.licenseNumber),
+                Info(infoText: 'Name: ', infoData: widget.docSnapshot.data.name),
+                Info(infoText: 'Email ID: ', infoData: widget.docSnapshot.data.emailID),
+                Info(infoText: 'Blood group: ', infoData: widget.docSnapshot.data.bloodGroup),
+                Info(infoText: 'Contact number: ', infoData: widget.docSnapshot.data.contact),
+                Info(infoText: 'License number: ', infoData: widget.docSnapshot.data.licenseNumber),
                 SizedBox(
                   height: 20,
                 ),
                 GestureDetector(
                   onTap: () {
+                    Provider.of<StationBloc>(context, listen: false).setSelectedStartStation(null);
+                    Provider.of<StationBloc>(context, listen: false).setSelectedEndStation(null);
+                    Provider.of<StationBloc>(context, listen: false).isStartStationSelected = false;
+                    Provider.of<StationBloc>(context, listen: false).isEndStationSelected = false;
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(
