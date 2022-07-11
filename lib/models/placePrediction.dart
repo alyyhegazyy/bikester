@@ -1,13 +1,13 @@
 class PlacePrediction {
-  String secondary_text;
-  String main_text;
-  String place_id;
+  String secondaryText;
+  String mainText;
+  String placeId;
 
-  PlacePrediction({this.main_text, this.secondary_text, this.place_id});
+  PlacePrediction({this.mainText, this.secondaryText, this.placeId});
 
   PlacePrediction.fromJson(Map<String, dynamic> json) {
-    place_id = json['place_id'];
-    secondary_text = json['structured_formatting']['secondary_text'];
-    main_text = json['structured_formatting']['main_text'];
+    placeId = json['place_id'];
+    secondaryText = json['structured_formatting']['secondary_text'];
+    mainText = json['structured_formatting']['main_text'];
   }
 }

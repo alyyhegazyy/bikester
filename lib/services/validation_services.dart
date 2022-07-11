@@ -6,13 +6,12 @@ class ValidationService {
       return 'Please enter a valid email';
     }
 
-    // String pattern = r'^.+@[a-zA-Z]+\.{1}[a-zA-Z]+(\.{0,1}[a-zA-Z]+)$';
-    // RegExp regExp = new RegExp(pattern);
-    //
-    // if (!regExp.hasMatch(value)) {
-    //   // print('here');
-    //   return 'Please enter a valid email';
-    // }
+    String pattern = r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+";
+    RegExp regExp = RegExp(pattern);
+
+    if (!regExp.hasMatch(value)) {
+      return 'Please enter a valid email';
+    }
 
     return null;
   }
@@ -27,8 +26,7 @@ class ValidationService {
       return 'Please enter a password with more than 8 characters';
     }
 
-    String pattern =
-        r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$';
+    String pattern = r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$';
     RegExp regExp = new RegExp(pattern);
 
     if (!regExp.hasMatch(value)) {
@@ -52,8 +50,6 @@ class ValidationService {
     if (value == null || value.isEmpty) {
       return 'Please enter a valid age';
     }
-
-    print('here');
 
     int intValue = int.parse(value);
 
@@ -88,8 +84,7 @@ class ValidationService {
       return 'Please enter a valid License Number';
     }
 
-    String pattern =
-        r'^(([A-Z]{2}[0-9]{2})( )|([A-Z]{2}-[0-9]{2}))((19|20)[0-9][0-9])[0-9]{7}$';
+    String pattern = r'^(([A-Z]{2}[0-9]{2})( )|([A-Z]{2}-[0-9]{2}))((19|20)[0-9][0-9])[0-9]{7}$';
     RegExp regExp = new RegExp(pattern);
 
     if (!regExp.hasMatch(value)) {

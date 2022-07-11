@@ -5,7 +5,6 @@ class AppUser {
   String contact;
   String age;
   String emailID;
-  // String dpURL;
   bool hasCompleteProfile = false;
   String uuid;
 
@@ -19,7 +18,6 @@ class AppUser {
       'contact': contact,
       'age': age,
       'emailID': emailID,
-      // 'dpURL': dpURL,
       'hasCompletedProfile': hasCompleteProfile,
       'uuid': uuid,
     };
@@ -32,7 +30,6 @@ class AppUser {
     contact = data['contact'];
     age = data['age'];
     emailID = data['emailID'];
-    // dpURL = data['dpURL'];
     hasCompleteProfile = data['hasCompleteProfile'];
     uuid = data['uuid'];
   }
@@ -57,11 +54,11 @@ class VehicleUser {
       'vehicleNumber': vehicleNumber,
       'ownerName': ownerName,
       'color': color,
-      'vehicleImg' : vehicleImg,
+      'vehicleImg': vehicleImg,
       'aadharNumber': aadharNumber,
       'hasCompletedRegistration': hasCompletedRegistration,
       'amount': amount,
-      'ownerEmail': ownerEmail
+      'ownerEmail': ownerEmail,
     };
   }
 

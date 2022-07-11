@@ -21,9 +21,7 @@ class _SearchDropOffLocationState extends State<SearchDropOffLocation> {
 
   @override
   Widget build(BuildContext context) {
-    String placeAddress =
-        Provider.of<AppData>(context).pickUpLocation.placeName ??
-            ' Pick Up loaction';
+    String placeAddress = Provider.of<AppData>(context).pickUpLocation.placeName ?? ' Pick Up loaction';
     pickUpTextEditingController.text = placeAddress;
 
     return Scaffold(
@@ -123,8 +121,7 @@ class _SearchDropOffLocationState extends State<SearchDropOffLocation> {
 
   void findPlace(String placeName) async {
     if (placeName.length > 0) {
-      String autoCompleteUrl =
-          'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$placeName&key=$geocodingApi&components=country:in';
+      String autoCompleteUrl = 'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$placeName&key=$geocodingApi&components=country:in';
       var res = await RequestAssistant.getRequest(autoCompleteUrl);
 
       if (res == 'failed') {
@@ -132,9 +129,7 @@ class _SearchDropOffLocationState extends State<SearchDropOffLocation> {
       }
       if (res['status'] == 'OK') {
         var predictions = res['predictions'];
-        var placeList = (predictions as List)
-            .map((e) => PlacePrediction.fromJson(e))
-            .toList();
+        var placeList = (predictions as List).map((e) => PlacePrediction.fromJson(e)).toList();
         setState(() {
           placePredictionList = placeList;
         });
@@ -151,7 +146,7 @@ class PredictionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        getPlaceAddressDetails(placePrediction.place_id, context);
+        getPlaceAddressDetails(placePrediction.placeId, context);
       },
       child: Container(
         child: Column(
@@ -169,7 +164,7 @@ class PredictionTile extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        placePrediction.main_text,
+                        placePrediction.mainText,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(fontSize: 16),
                       ),
@@ -177,7 +172,7 @@ class PredictionTile extends StatelessWidget {
                         height: 5,
                       ),
                       Text(
-                        placePrediction.secondary_text,
+                        placePrediction.secondaryText,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(fontSize: 12, color: Colors.grey),
                       ),
@@ -198,12 +193,10 @@ class PredictionTile extends StatelessWidget {
   void getPlaceAddressDetails(String placeId, context) async {
     showDialog(
       context: context,
-      builder: (BuildContext context) =>
-          ProgressDialog(status: 'Setting Dropoff location\nPlease Wait....'),
+      builder: (BuildContext context) => ProgressDialog(status: 'Setting Dropoff location\nPlease Wait....'),
     );
 
-    String placeDetailsUrl =
-        'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$geocodingApi';
+    String placeDetailsUrl = 'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$geocodingApi';
 
     var res = await RequestAssistant.getRequest(placeDetailsUrl);
 
@@ -220,8 +213,7 @@ class PredictionTile extends StatelessWidget {
       address.latitude = res['result']['geometry']['location']['lat'];
       address.longitude = res['result']['geometry']['location']['lng'];
 
-      Provider.of<AppData>(context, listen: false)
-          .updateDropOffLocation(address);
+      Provider.of<AppData>(context, listen: false).updateDropOffLocation(address);
       print('Drop Off Location ::');
       print(address.placeName);
 

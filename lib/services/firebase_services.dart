@@ -8,34 +8,26 @@ import 'package:uuid/uuid.dart';
 import 'package:path/path.dart' as path;
 import 'package:flutter/widgets.dart';
 
-
 class FirebaseFunctions {
-  final CollectionReference collectionReference =
-      FirebaseFirestore.instance.collection('users');
+  final CollectionReference collectionReference = FirebaseFirestore.instance.collection('users');
 
   Future<String> uploadUserData(Map<String, dynamic> data) async {
     String isUploaded;
 
     User currentUser = FirebaseAuth.instance.currentUser;
 
-    await collectionReference
-        .doc(currentUser.uid)
-        .set(data)
-        .then((_) => isUploaded = 'true')
-        .catchError((e) => isUploaded = e.message);
+    await collectionReference.doc(currentUser.uid).set(data).then((_) => isUploaded = 'true').catchError((e) => isUploaded = e.message);
 
     return isUploaded;
   }
 
   Future<bool> hasUserCompletedProfile() async {
-    CollectionReference collectionReference =
-        FirebaseFirestore.instance.collection('users');
+    CollectionReference collectionReference = FirebaseFirestore.instance.collection('users');
 
     User currentUser = FirebaseAuth.instance.currentUser;
 
     bool isComplete = false;
-    await collectionReference.doc(currentUser.uid).get().then((docSnap) =>
-        isComplete = AppUser.fromMap(docSnap.data()).hasCompleteProfile);
+    await collectionReference.doc(currentUser.uid).get().then((docSnap) => isComplete = AppUser.fromMap(docSnap.data()).hasCompleteProfile);
     print('iscomplete');
     print(isComplete);
 
@@ -57,9 +49,7 @@ class FirebaseFunctions {
     }
   }
 
-
   //upload image
-
   Future<String> uploadVehicleInfo(Map<String, dynamic> data, File localFile, BuildContext context) async {
     if (localFile != null) {
       print('uploading img file');
@@ -69,8 +59,7 @@ class FirebaseFunctions {
 
       var uuid = Uuid().v4();
 
-      final Reference firebaseStorageRef =
-      FirebaseStorage.instance.ref().child('images/$uuid$fileExtension');
+      final Reference firebaseStorageRef = FirebaseStorage.instance.ref().child('images/$uuid$fileExtension');
 
       UploadTask task = firebaseStorageRef.putFile(localFile);
 
@@ -91,26 +80,23 @@ class FirebaseFunctions {
 
     print(data);
 
-      String isRegistered;
-      User currentUser = FirebaseAuth.instance.currentUser;
-      currentFirebaseUser = currentUser;
-      CollectionReference collectionReference = FirebaseFirestore.instance
-          .collection('users/${currentUser.uid}/vehicle_details');
+    String isRegistered;
+    User currentUser = FirebaseAuth.instance.currentUser;
+    currentFirebaseUser = currentUser;
+    CollectionReference collectionReference = FirebaseFirestore.instance.collection('users/${currentUser.uid}/vehicle_details');
 
-      await collectionReference
-          .doc(currentUser.uid)
-          .set(data)
-          .then((_) => isRegistered = 'true')
-      // ignore: return_of_invalid_type_from_catch_error
-          .catchError((e) => isRegistered = e.message);
-      print(isRegistered);
-      return isRegistered;
-
+    await collectionReference
+        .doc(currentUser.uid)
+        .set(data)
+        .then((_) => isRegistered = 'true')
+        // ignore: return_of_invalid_type_from_catch_error
+        .catchError((e) => isRegistered = e.message);
+    print(isRegistered);
+    return isRegistered;
   }
 
   Future<VehicleUser> getOwner(String key) async {
-    CollectionReference collectionReference =
-        FirebaseFirestore.instance.collection('users/$key/vehicle_details');
+    CollectionReference collectionReference = FirebaseFirestore.instance.collection('users/$key/vehicle_details');
     final ownerDoc = await collectionReference.doc(key).get();
     // print('USer id:: ');
     // print(ownerDoc);

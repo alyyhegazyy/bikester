@@ -39,15 +39,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider<AuthenticationService>(
-          create: (_) => AuthenticationService(FirebaseAuth.instance),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => AppData(),
-        ),
-        StreamProvider(
-          create: (context) => context.read<AuthenticationService>().authStateChanges,
-        ),
+        Provider<AuthenticationService>(create: (_) => AuthenticationService(FirebaseAuth.instance)),
+        ChangeNotifierProvider(create: (_) => AppData()),
+        StreamProvider(create: (context) => context.read<AuthenticationService>().authStateChanges),
       ],
       child: MaterialApp(
         title: 'hopOn',
@@ -55,7 +49,6 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           fontFamily: 'OpenSans',
           primaryColor: Color.fromRGBO(0, 0, 0, 1),
-          // 27, 34, 46
         ),
         home: AuthenticationWrapper(),
       ),

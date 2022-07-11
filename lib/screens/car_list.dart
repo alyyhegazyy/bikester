@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:vehicle_sharing_app/globalvariables.dart';
 import 'package:vehicle_sharing_app/widgets/widgets.dart';
 
 import '../services/firebase_services.dart';
@@ -12,7 +11,7 @@ class CarList extends StatefulWidget {
   String initialLocation;
   String pickupDate;
   String dropOffDate;
-  CarList({this.carlist, this.cost,this.finalDestination, this.initialLocation, this.dropOffDate, this.pickupDate});
+  CarList({this.carlist, this.cost, this.finalDestination, this.initialLocation, this.dropOffDate, this.pickupDate});
 
   @override
   _CarListState createState() => _CarListState();
@@ -45,12 +44,11 @@ class _CarListState extends State<CarList> {
                 if (snapshot.hasData) {
                   return GestureDetector(
                     onTap: () {
-
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => DetailsCar(
-                            bookedCar : car,
+                            bookedCar: car,
                             initialLocation: widget.initialLocation,
                             finalDestination: widget.finalDestination,
                             docSnapshot: snapshot,
@@ -62,8 +60,7 @@ class _CarListState extends State<CarList> {
                       );
                     },
                     child: Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                       margin: EdgeInsets.symmetric(vertical: 10),
                       decoration: BoxDecoration(
                         color: Colors.white,
@@ -84,15 +81,11 @@ class _CarListState extends State<CarList> {
                                 children: [
                                   Text(
                                     '₹' + snapshot.data.amount,
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 15),
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                                   ),
                                   Text(
                                     snapshot.data.modelName,
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 10),
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 10),
                                   ),
                                 ],
                               ),

@@ -49,7 +49,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void geolocator = Geolocator();
 
   double rideDetailContainerHeight = 0;
-  double searchDetailContainerHeight = 300;
+  double searchDetailContainerHeight = 200;
 
   bool drawerOpen = true;
   String finalDestination = '';
@@ -84,18 +84,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   void locatePosition() async {
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.bestForNavigation);
+    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.bestForNavigation);
     currentPosition = position;
     LatLng latlngPosition = LatLng(position.latitude, position.longitude);
 
-    CameraPosition cameraPosition =
-        new CameraPosition(target: latlngPosition, zoom: 14);
-    newGoogleMapController
-        .moveCamera(CameraUpdate.newCameraPosition(cameraPosition));
+    CameraPosition cameraPosition = new CameraPosition(target: latlngPosition, zoom: 14);
+    newGoogleMapController.moveCamera(CameraUpdate.newCameraPosition(cameraPosition));
 
-    String address =
-        await AssistantMethods.searchCoordinateAddress(position, context);
+    String address = await AssistantMethods.searchCoordinateAddress(position, context);
     if (address == '') {
       print('Nulladdress');
     }
@@ -106,9 +102,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void startGeofireListener() {
     // print(currentPosition);
     Geofire.initialize('carsAvailable');
-    Geofire.queryAtLocation(
-            currentPosition.latitude, currentPosition.longitude, 20)
-        .listen((map) {
+    Geofire.queryAtLocation(currentPosition.latitude, currentPosition.longitude, 20).listen((map) {
       // print(map);
       if (map != null) {
         var callBack = map['callBack'];
@@ -128,8 +122,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             break;
 
           case Geofire.onKeyExited:
-            int index =
-                nearbyCarId.indexWhere((element) => element.key == map['key']);
+            int index = nearbyCarId.indexWhere((element) => element.key == map['key']);
             nearbyCarId.removeAt(index);
             FireHelper.removeFromList(map['key']);
             break;
@@ -166,8 +159,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   DateTime selectedDropOffDate = DateTime.now();
 
   bool _decideWhichDayToEnable(DateTime day) {
-    if ((day.isAfter(DateTime.now().subtract(Duration(days: 1))) &&
-        day.isBefore(DateTime.now().add(Duration(days: 10))))) {
+    if ((day.isAfter(DateTime.now().subtract(Duration(days: 1))) && day.isBefore(DateTime.now().add(Duration(days: 10))))) {
       return true;
     }
     return false;
@@ -279,8 +271,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             SizedBox(height: 8),
                             Text(
                               'Visit Profile',
-                              style: TextStyle(
-                                  color: Colors.black54, fontSize: 12),
+                              style: TextStyle(color: Colors.black54, fontSize: 12),
                             ),
                           ],
                         ),
@@ -469,7 +460,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               return SearchDropOffLocation();
                             }),
                           );
-
                           if (res == 'obtainDirection') {
                             displayRideDetailContainer();
                           }
@@ -482,8 +472,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                 Icon(Icons.search),
                                 Text(
                                   '\t\tDrop off location',
-                                  style: TextStyle(
-                                      fontSize: 14, color: Colors.black54),
+                                  style: TextStyle(fontSize: 14, color: Colors.black54),
                                 ),
                               ],
                             ),
@@ -520,30 +509,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               children: [
                                 Container(
                                   child: Text(
-                                    Provider.of<AppData>(context)
-                                                .pickUpLocation !=
-                                            null
-                                        ? (Provider.of<AppData>(context)
-                                                    .pickUpLocation
-                                                    .placeName
-                                                    .length >
-                                                40
-                                            ? Provider.of<AppData>(context)
-                                                    .pickUpLocation
-                                                    .placeName
-                                                    .substring(0, 41) +
-                                                '\n' +
-                                                Provider.of<AppData>(context)
-                                                    .pickUpLocation
-                                                    .placeName
-                                                    .substring(41)
-                                            : Provider.of<AppData>(context)
-                                                .pickUpLocation
-                                                .placeName)
-                                        : 'Add Home',
+                                    Provider.of<AppData>(context).pickUpLocation != null ? (Provider.of<AppData>(context).pickUpLocation.placeName.length > 40 ? Provider.of<AppData>(context).pickUpLocation.placeName.substring(0, 41) + '\n' + Provider.of<AppData>(context).pickUpLocation.placeName.substring(41) : Provider.of<AppData>(context).pickUpLocation.placeName) : 'Add Home',
                                     style: TextStyle(fontSize: 12),
-                                    // overflow: TextOverflow.ellipsis,
-                                    // maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
                                   ),
                                 ),
                                 SizedBox(
@@ -551,43 +520,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                 ),
                                 Text(
                                   'Your home address',
-                                  style: TextStyle(
-                                      fontSize: 11, color: Colors.black54),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(
-                        height: 8,
-                      ),
-                      Divider(),
-                      SizedBox(
-                        height: 8,
-                      ),
-                      Container(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Icon(Icons.work),
-                            SizedBox(
-                              width: 20,
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Add Office?',
-                                  style: TextStyle(fontSize: 12),
-                                ),
-                                SizedBox(
-                                  height: 4,
-                                ),
-                                Text(
-                                  'Your office address',
-                                  style: TextStyle(
-                                      fontSize: 11, color: Colors.black54),
+                                  style: TextStyle(fontSize: 11, color: Colors.black54),
                                 ),
                               ],
                             ),
@@ -600,7 +533,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ),
             ),
           ),
-
           Positioned(
             left: 0,
             right: 0,
@@ -671,12 +603,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                   ),
                                 ),
                                 Text(
-                                  ((tripDirectionDetails != null)
-                                      ? tripDirectionDetails.distanceText
-                                      : ''),
-                                  style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold),
+                                  ((tripDirectionDetails != null) ? tripDirectionDetails.distanceText : ''),
+                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
@@ -689,12 +617,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                   ),
                                 ),
                                 Text(
-                                  ((tripDirectionDetails != null)
-                                      ? '₹ ${AssistantMethods.calculateFares(tripDirectionDetails)}'
-                                      : ''),
-                                  style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold),
+                                  ((tripDirectionDetails != null) ? '₹ ${AssistantMethods.calculateFares(tripDirectionDetails)}' : ''),
+                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
@@ -712,11 +636,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  "${selectedPickupDate.toLocal()}"
-                                      .split(' ')[0],
-                                  style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold),
+                                  "${selectedPickupDate.toLocal()}".split(' ')[0],
+                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                                 ),
                                 SizedBox(
                                   height: 10.0,
@@ -726,8 +647,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                     _selectPickupDate(context);
                                   },
                                   child: Container(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 15, vertical: 12),
+                                    padding: EdgeInsets.symmetric(horizontal: 15, vertical: 12),
                                     decoration: BoxDecoration(
                                       color: Colors.white,
                                       boxShadow: [
@@ -736,16 +656,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                           blurRadius: 10,
                                         ),
                                       ],
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(8)),
+                                      borderRadius: BorderRadius.all(Radius.circular(8)),
                                     ),
                                     child: Center(
                                       child: Text(
                                         'Select PickUp Date',
-                                        style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold),
+                                        style: TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold),
                                       ),
                                     ),
                                   ),
@@ -759,11 +675,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  "${selectedDropOffDate.toLocal()}"
-                                      .split(' ')[0],
-                                  style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold),
+                                  "${selectedDropOffDate.toLocal()}".split(' ')[0],
+                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                                 ),
                                 SizedBox(
                                   height: 10.0,
@@ -773,8 +686,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                     _selectDropOffDate(context);
                                   },
                                   child: Container(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 15, vertical: 12),
+                                    padding: EdgeInsets.symmetric(horizontal: 15, vertical: 12),
                                     decoration: BoxDecoration(
                                       color: Colors.white,
                                       boxShadow: [
@@ -783,16 +695,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                           blurRadius: 10,
                                         ),
                                       ],
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(8)),
+                                      borderRadius: BorderRadius.all(Radius.circular(8)),
                                     ),
                                     child: Center(
                                       child: Text(
                                         'Select DropOff Date',
-                                        style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold),
+                                        style: TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold),
                                       ),
                                     ),
                                   ),
@@ -813,15 +721,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                   initialLocation: initialLocation,
                                   finalDestination: finalDestination,
                                   carlist: nearbyCarId,
-                                  cost: ((tripDirectionDetails != null)
-                                      ? AssistantMethods.calculateFares(
-                                          tripDirectionDetails)
-                                      : 0),
-                                  pickupDate: "${selectedPickupDate.toLocal()}"
-                                      .split(' ')[0],
-                                  dropOffDate:
-                                      "${selectedDropOffDate.toLocal()}"
-                                          .split(' ')[0],
+                                  cost: ((tripDirectionDetails != null) ? AssistantMethods.calculateFares(tripDirectionDetails) : 0),
+                                  pickupDate: "${selectedPickupDate.toLocal()}".split(' ')[0],
+                                  dropOffDate: "${selectedDropOffDate.toLocal()}".split(' ')[0],
                                 );
                               }),
                             );
@@ -843,8 +745,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Future<void> getPlaceDirection() async {
-    var initialPos =
-        Provider.of<AppData>(context, listen: false).pickUpLocation;
+    var initialPos = Provider.of<AppData>(context, listen: false).pickUpLocation;
     var finalPos = Provider.of<AppData>(context, listen: false).dropOffLocation;
 
     var pickUpLatLng = LatLng(initialPos.latitude, initialPos.longitude);
@@ -852,12 +753,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
     showDialog(
       context: context,
-      builder: (BuildContext context) =>
-          ProgressDialog(status: 'Please Wait....'),
+      builder: (BuildContext context) => ProgressDialog(status: 'Please Wait....'),
     );
 
-    var details = await AssistantMethods.obtainPlaceDirectionDetails(
-        pickUpLatLng, dropOffLatLng);
+    var details = await AssistantMethods.obtainPlaceDirectionDetails(pickUpLatLng, dropOffLatLng);
     setState(() {
       tripDirectionDetails = details;
       finalDestination = finalPos.placeName;
@@ -870,15 +769,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
     PolylinePoints polylinePoints = PolylinePoints();
 
-    List<PointLatLng> decodedPolylinePointResult =
-        polylinePoints.decodePolyline(details.encodedPoints);
+    List<PointLatLng> decodedPolylinePointResult = polylinePoints.decodePolyline(details.encodedPoints);
 
     pLinesCoordinates.clear();
 
     if (decodedPolylinePointResult.isNotEmpty) {
       decodedPolylinePointResult.forEach((PointLatLng pointLatLng) {
-        pLinesCoordinates
-            .add(LatLng(pointLatLng.latitude, pointLatLng.longitude));
+        pLinesCoordinates.add(LatLng(pointLatLng.latitude, pointLatLng.longitude));
       });
     }
 
@@ -901,10 +798,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
         LatLngBounds latLngBounds;
 
-        if (pickUpLatLng.latitude > dropOffLatLng.latitude &&
-            pickUpLatLng.longitude > dropOffLatLng.longitude) {
-          latLngBounds =
-              LatLngBounds(southwest: dropOffLatLng, northeast: pickUpLatLng);
+        if (pickUpLatLng.latitude > dropOffLatLng.latitude && pickUpLatLng.longitude > dropOffLatLng.longitude) {
+          latLngBounds = LatLngBounds(southwest: dropOffLatLng, northeast: pickUpLatLng);
         } else if (pickUpLatLng.longitude > dropOffLatLng.longitude) {
           latLngBounds = LatLngBounds(
             southwest: LatLng(pickUpLatLng.latitude, dropOffLatLng.longitude),
@@ -916,8 +811,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             northeast: LatLng(pickUpLatLng.latitude, dropOffLatLng.longitude),
           );
         } else {
-          latLngBounds =
-              LatLngBounds(southwest: pickUpLatLng, northeast: dropOffLatLng);
+          latLngBounds = LatLngBounds(southwest: pickUpLatLng, northeast: dropOffLatLng);
         }
 
         newGoogleMapController.animateCamera(
@@ -926,15 +820,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
         Marker pickUpLocMarker = Marker(
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-          infoWindow:
-              InfoWindow(title: initialPos.placeName, snippet: 'PickUp'),
+          infoWindow: InfoWindow(title: initialPos.placeName, snippet: 'PickUp'),
           position: pickUpLatLng,
           markerId: MarkerId('pickUpId'),
         );
 
         Marker dropOffLocMarker = Marker(
-          icon:
-              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
           infoWindow: InfoWindow(title: finalPos.placeName, snippet: 'DropOff'),
           position: dropOffLatLng,
           markerId: MarkerId('dropOffId'),
