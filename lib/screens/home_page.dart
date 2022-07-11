@@ -11,15 +11,13 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:vehicle_sharing_app/assistant/assistantMethods.dart';
-import 'package:vehicle_sharing_app/dataHandler/appdata.dart';
 import 'package:vehicle_sharing_app/models/directionDetails.dart';
 import 'package:vehicle_sharing_app/models/station_model.dart';
 import 'package:vehicle_sharing_app/models/user.dart';
 import 'package:vehicle_sharing_app/notifier/station_bloc.dart';
-import 'package:vehicle_sharing_app/screens/about_us.dart';
-import 'package:vehicle_sharing_app/screens/car_list.dart';
 import 'package:vehicle_sharing_app/screens/profile_page.dart';
 import 'package:vehicle_sharing_app/screens/ride_history_page.dart';
+import 'package:vehicle_sharing_app/screens/search_dropOff.dart';
 import 'package:vehicle_sharing_app/services/authentication_service.dart';
 import 'package:vehicle_sharing_app/services/firebase_services.dart';
 import 'package:vehicle_sharing_app/widgets/single_station.dart';
@@ -29,7 +27,6 @@ import '../assistant/fireHelper.dart';
 import '../globalvariables.dart';
 import '../models/nearbyCar.dart';
 import 'login_page.dart';
-import 'owner_homePage.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -555,128 +552,62 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     ),
                   ),
 
-                // Positioned(
-                //   left: 0,
-                //   right: 0,
-                //   bottom: 0,
-                //   child: AnimatedSize(
-                //     vsync: this,
-                //     curve: Curves.bounceIn,
-                //     duration: Duration(milliseconds: 500),
-                //     child: Container(
-                //       height: searchDetailContainerHeight,
-                //       decoration: BoxDecoration(
-                //         color: Colors.white,
-                //         borderRadius: BorderRadius.only(
-                //           topLeft: Radius.circular(5),
-                //           topRight: Radius.circular(5),
-                //         ),
-                //         boxShadow: [
-                //           BoxShadow(
-                //             color: Colors.black54,
-                //             blurRadius: 16,
-                //             spreadRadius: 0.2,
-                //             offset: Offset(1, 1),
-                //           ),
-                //         ],
-                //       ),
-                //       child: Padding(
-                //         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                //         child: Column(
-                //           crossAxisAlignment: CrossAxisAlignment.start,
-                //           children: [
-                //             Text(
-                //               'Hi there,',
-                //               style: TextStyle(fontSize: 11),
-                //             ),
-                //             Text(
-                //               'Hoping to?',
-                //               style: TextStyle(fontSize: 13),
-                //             ),
-                //             SizedBox(
-                //               height: 20,
-                //             ),
-                //             GestureDetector(
-                //               onTap: () async {
-                //                 var res = await Navigator.push(
-                //                   context,
-                //                   MaterialPageRoute(builder: (context) {
-                //                     return SearchDropOffLocation();
-                //                   }),
-                //                 );
-                //                 if (res == 'obtainDirection') {
-                //                   displayRideDetailContainer();
-                //                 }
-                //               },
-                //               child: Container(
-                //                 child: Padding(
-                //                   padding: EdgeInsets.all(8.0),
-                //                   child: Row(
-                //                     children: [
-                //                       Icon(Icons.search),
-                //                       Text(
-                //                         '\t\tDrop off location',
-                //                         style: TextStyle(fontSize: 14, color: Colors.black54),
-                //                       ),
-                //                     ],
-                //                   ),
-                //                 ),
-                //                 decoration: BoxDecoration(
-                //                   color: Colors.white,
-                //                   borderRadius: BorderRadius.all(
-                //                     Radius.circular(5),
-                //                   ),
-                //                   boxShadow: [
-                //                     BoxShadow(
-                //                       color: Colors.black54,
-                //                       blurRadius: 4,
-                //                       spreadRadius: 0.2,
-                //                       offset: Offset(0.7, 0.7),
-                //                     ),
-                //                   ],
-                //                 ),
-                //               ),
-                //             ),
-                //             SizedBox(
-                //               height: 20,
-                //             ),
-                //             Container(
-                //               child: Row(
-                //                 mainAxisAlignment: MainAxisAlignment.start,
-                //                 children: [
-                //                   Icon(Icons.home),
-                //                   SizedBox(
-                //                     width: 20,
-                //                   ),
-                //                   Column(
-                //                     crossAxisAlignment: CrossAxisAlignment.start,
-                //                     children: [
-                //                       Container(
-                //                         child: Text(
-                //                           Provider.of<AppData>(context).pickUpLocation != null ? (Provider.of<AppData>(context).pickUpLocation.placeName.length > 40 ? Provider.of<AppData>(context).pickUpLocation.placeName.substring(0, 41) + '\n' + Provider.of<AppData>(context).pickUpLocation.placeName.substring(41) : Provider.of<AppData>(context).pickUpLocation.placeName) : 'Add Home',
-                //                           style: TextStyle(fontSize: 12),
-                //                           overflow: TextOverflow.ellipsis,
-                //                           maxLines: 1,
-                //                         ),
-                //                       ),
-                //                       SizedBox(
-                //                         height: 4,
-                //                       ),
-                //                       Text(
-                //                         'Your home address',
-                //                         style: TextStyle(fontSize: 11, color: Colors.black54),
-                //                       ),
-                //                     ],
-                //                   ),
-                //                 ],
-                //               ),
-                //             ),
-                //           ],
-                //         ),
-                //       ),
-                //     ),
-                //   ),
-                // ),
+                Positioned(
+                  left: 70,
+                  right: 20,
+                  top: 42,
+                  child: AnimatedSize(
+                    vsync: this,
+                    curve: Curves.bounceIn,
+                    duration: Duration(milliseconds: 500),
+                    child: GestureDetector(
+                      onTap: () async {
+                        var res = await Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) {
+                            return SearchDropOffLocation();
+                          }),
+                        );
+
+                        if (res != null) {
+                          newGoogleMapController.animateCamera(
+                            CameraUpdate.newCameraPosition(
+                              CameraPosition(target: LatLng(res.latitude, res.longitude), zoom: 13.5),
+                            ),
+                          );
+                        }
+                      },
+                      child: Container(
+                        child: Padding(
+                          padding: EdgeInsets.all(11),
+                          child: Row(
+                            children: [
+                              Icon(Icons.search),
+                              Text(
+                                '\t\tSearch Places',
+                                style: TextStyle(fontSize: 14, color: Colors.black54),
+                              ),
+                            ],
+                          ),
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(5),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black54,
+                              blurRadius: 4,
+                              spreadRadius: 0.2,
+                              offset: Offset(0.7, 0.7),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
 
                 if (Provider.of<StationBloc>(context).isStartStationSelected && Provider.of<StationBloc>(context).isEndStationSelected)
                   Positioned(

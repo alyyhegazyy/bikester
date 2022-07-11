@@ -14,16 +14,12 @@ class SearchDropOffLocation extends StatefulWidget {
 }
 
 class _SearchDropOffLocationState extends State<SearchDropOffLocation> {
-  TextEditingController pickUpTextEditingController = TextEditingController();
   TextEditingController dropOffTextEditingController = TextEditingController();
 
   List<PlacePrediction> placePredictionList = [];
 
   @override
   Widget build(BuildContext context) {
-    String placeAddress = Provider.of<AppData>(context).pickUpLocation.placeName ?? ' Pick Up loaction';
-    pickUpTextEditingController.text = placeAddress;
-
     return Scaffold(
       backgroundColor: Color.fromRGBO(245, 245, 242, 1),
       body: SingleChildScrollView(
@@ -31,30 +27,16 @@ class _SearchDropOffLocationState extends State<SearchDropOffLocation> {
         child: Column(
           children: [
             Container(
-              height: MediaQuery.of(context).size.height * 0.5,
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
                 children: [
-                  CustomBackButton(pageHeader: 'Seach dropOff location'),
-                  SizedBox(height: 30),
+                  CustomBackButton(pageHeader: 'Seach Places'),
                   Container(
                     width: MediaQuery.of(context).size.width * 0.85,
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: TextField(
-                        controller: pickUpTextEditingController,
-                        decoration: InputDecoration(
-                          labelText: 'Pick up location',
-                        ),
-                        style: TextStyle(fontSize: 14, color: Colors.black54),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.85,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextField(
+                        autofocus: true,
                         onChanged: (val) {
                           findPlace(val);
                         },
@@ -66,8 +48,9 @@ class _SearchDropOffLocationState extends State<SearchDropOffLocation> {
                       ),
                     ),
                   ),
-
-                  //CALENDAR
+                  SizedBox(
+                    height: 30,
+                  ),
                 ],
               ),
               decoration: BoxDecoration(
@@ -193,7 +176,7 @@ class PredictionTile extends StatelessWidget {
   void getPlaceAddressDetails(String placeId, context) async {
     showDialog(
       context: context,
-      builder: (BuildContext context) => ProgressDialog(status: 'Setting Dropoff location\nPlease Wait....'),
+      builder: (BuildContext context) => ProgressDialog(status: 'picking location\nPlease Wait....'),
     );
 
     String placeDetailsUrl = 'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$geocodingApi';
@@ -217,7 +200,7 @@ class PredictionTile extends StatelessWidget {
       print('Drop Off Location ::');
       print(address.placeName);
 
-      Navigator.pop(context, 'obtainDirection');
+      Navigator.pop<Address>(context, address);
     }
   }
 }

@@ -43,16 +43,15 @@ class _SignUpPageState extends State<SignUpPage> {
           child: Column(
             children: [
               Text(
-                'hopOn',
+                'Bikester',
                 style: TextStyle(
-                  fontSize: 50,
-                  letterSpacing: 2,
+                  fontSize: 53,
+                  letterSpacing: 2.3,
                   fontWeight: FontWeight.bold,
-                  fontFamily: 'MuseoModerno',
-                  // color: Colors.white,
+                  fontFamily: 'Segoe',
                 ),
               ),
-              SizedBox(height: 30),
+              SizedBox(height: 40),
               InputTextField(
                 controller: emailIdController,
                 label: 'Email-Id',
@@ -77,10 +76,8 @@ class _SignUpPageState extends State<SignUpPage> {
               GestureDetector(
                 onTap: () async {
                   // network connectivity
-                  var connectivityResult =
-                      await Connectivity().checkConnectivity();
-                  if (connectivityResult != ConnectivityResult.mobile &&
-                      connectivityResult != ConnectivityResult.wifi) {
+                  var connectivityResult = await Connectivity().checkConnectivity();
+                  if (connectivityResult != ConnectivityResult.mobile && connectivityResult != ConnectivityResult.wifi) {
                     showSnackBar('No Internet connectivity');
                     return;
                   }
@@ -137,8 +134,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     Text(
                       'Login here',
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                     ),
                   ],
                 ),

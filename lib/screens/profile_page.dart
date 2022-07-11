@@ -83,7 +83,6 @@ class _ProfilePageState extends State<ProfilePage> {
               alignment: FractionalOffset.bottomCenter,
               child: Container(
                 height: 240,
-                // color: Colors.white,
                 width: MediaQuery.of(context).size.width,
                 child: ListView(
                   children: [

@@ -5,12 +5,17 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vehicle_sharing_app/dataHandler/appdata.dart';
 import 'package:vehicle_sharing_app/screens/home_page.dart';
 import 'package:vehicle_sharing_app/screens/login_page.dart';
+import 'package:vehicle_sharing_app/screens/onboarding_page.dart';
 import 'package:vehicle_sharing_app/services/authentication_service.dart';
+import 'package:vehicle_sharing_app/utils/app_router.dart';
 
 import 'notifier/station_bloc.dart';
+
+int initScreen;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,10 +38,17 @@ Future<void> main() async {
           ),
   );
 
-  runApp(MyApp());
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  initScreen = prefs.getInt('initScreen');
+  await prefs.setInt('initScreen', 1);
+
+  runApp(MyApp(initScreen));
 }
 
 class MyApp extends StatelessWidget {
+  final int initScreen;
+  const MyApp(this.initScreen, {Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -47,19 +59,25 @@ class MyApp extends StatelessWidget {
         StreamProvider(create: (context) => context.read<AuthenticationService>().authStateChanges),
       ],
       child: MaterialApp(
-        title: 'hopOn',
+        title: 'Bikester',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           fontFamily: 'OpenSans',
           primaryColor: Color.fromRGBO(0, 0, 0, 1),
         ),
-        home: AuthenticationWrapper(),
+        routes: AppRouter.routes,
+        // initialRoute: initScreen == 0 || initScreen == null ? OnboradingPage.routeName : AuthenticationWrapper.routeName,
+        initialRoute: OnboradingPage.routeName,
       ),
     );
   }
 }
 
 class AuthenticationWrapper extends StatelessWidget {
+  static const String routeName = '/auth';
+
+  const AuthenticationWrapper({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     final firebaseUser = context.watch<User>();

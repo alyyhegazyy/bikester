@@ -15,7 +15,6 @@ class _CompleteProfileState extends State<CompleteProfile> {
   final _formKey = GlobalKey<FormState>();
 
   TextEditingController _nameController = TextEditingController();
-  TextEditingController _licenseController = TextEditingController();
   TextEditingController _ageController = TextEditingController();
   TextEditingController _bloodController = TextEditingController();
   TextEditingController _contactController = TextEditingController();
@@ -29,10 +28,8 @@ class _CompleteProfileState extends State<CompleteProfile> {
   void initAppUser() {
     user.name = _nameController.text;
     user.age = _ageController.text;
-    user.licenseNumber = _licenseController.text;
     user.bloodGroup = _bloodController.text;
     user.contact = _contactController.text;
-    // user.dpURL = _imageUrl;
     user.emailID = FirebaseAuth.instance.currentUser.email;
     user.hasCompleteProfile = true;
   }
@@ -124,7 +121,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
                       height: 0.03 * deviceSize.height,
                     ),
                     InputFormField(
-                      fieldName: 'Blood Group',
+                      fieldName: 'Blood Type',
                       obscure: false,
                       validator: ValidationService().bloodValidator,
                       controller: _bloodController,
@@ -137,15 +134,6 @@ class _CompleteProfileState extends State<CompleteProfile> {
                       obscure: false,
                       validator: ValidationService().contactValidator,
                       controller: _contactController,
-                    ),
-                    SizedBox(
-                      height: 0.03 * deviceSize.height,
-                    ),
-                    InputFormField(
-                      fieldName: 'License Number',
-                      obscure: false,
-                      validator: ValidationService().licenseValidator,
-                      controller: _licenseController,
                     ),
                     SizedBox(
                       height: 0.05 * deviceSize.height,
@@ -183,11 +171,9 @@ class _CompleteProfileState extends State<CompleteProfile> {
                         //         SnackBar(content: Text(isComplete)));
                         //   }
                         // }
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Processing')));
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Processing')));
                         initAppUser();
-                        String isComplete = await firebaseFunctions
-                            .uploadUserData(user.toMap());
+                        String isComplete = await firebaseFunctions.uploadUserData(user.toMap());
                         if (isComplete == 'true') {
                           await Navigator.push(
                             context,
@@ -198,8 +184,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
                             ),
                           );
                         } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(isComplete)));
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(isComplete)));
                           Navigator.push(
                             context,
                             MaterialPageRoute(

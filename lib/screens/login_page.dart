@@ -29,93 +29,6 @@ class _LoginPageState extends State<LoginPage> {
   var emailIdController = TextEditingController();
   var passwordController = TextEditingController();
 
-  Widget _buildLogin() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 30),
-      child: Column(
-        children: [
-          InputTextField(
-            controller: emailIdController,
-            label: 'Email-Id',
-            icon: Icon(Icons.email_outlined),
-          ),
-          InputTextField(
-            controller: passwordController,
-            label: 'Password',
-            icon: Icon(Icons.lock),
-          ),
-          SizedBox(
-            height: 50,
-          ),
-          GestureDetector(
-            onTap: () async {
-              // network connectivity
-              var connectivityResult = await Connectivity().checkConnectivity();
-              if (connectivityResult != ConnectivityResult.mobile &&
-                  connectivityResult != ConnectivityResult.wifi) {
-                showSnackBar('No Internet connectivity');
-                return;
-              }
-
-              if (!emailIdController.text.contains('@')) {
-                showSnackBar('Please provide a valid email address');
-              }
-
-              if (passwordController.text.length < 6) {
-                showSnackBar('Please provide a password of length more than 6');
-              }
-              BuildContext dialogContext;
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (BuildContext context) {
-                  dialogContext = context;
-                  return ProgressDialog(
-                    status: 'Logging you in...',
-                  );
-                },
-              );
-              context
-                  .read<AuthenticationService>()
-                  .signIn(
-                    email: emailIdController.text.trim(),
-                    password: passwordController.text.trim(),
-                  )
-                  .then((value) => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) {
-                          return HomePage();
-                        }),
-                      ));
-              Navigator.pop(dialogContext);
-            },
-            child: CustomButton(
-              text: 'Login',
-            ),
-          ),
-          Text("\nDon't have any account?"),
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) {
-                  return SignUpPage();
-                }),
-              );
-            },
-            child: Text(
-              'SignUp here',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-            ),
-          ),
-          SizedBox(
-            height: 20,
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -123,22 +36,22 @@ class _LoginPageState extends State<LoginPage> {
       body: SingleChildScrollView(
         physics: BouncingScrollPhysics(),
         child: Padding(
-          padding: EdgeInsets.only(top: 130),
+          padding: EdgeInsets.only(top: 100),
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Text(
-                  'hopOn',
+                  'Bikester',
                   style: TextStyle(
-                    fontSize: 60,
-                    letterSpacing: 2,
+                    fontSize: 53,
+                    letterSpacing: 2.3,
                     fontWeight: FontWeight.bold,
-                    fontFamily: 'MuseoModerno',
+                    fontFamily: 'Segoe',
                     // color: Colors.white,
                   ),
                 ),
-                SizedBox(height: 80),
+                SizedBox(height: 50),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 30),
                   child: Column(
@@ -161,22 +74,18 @@ class _LoginPageState extends State<LoginPage> {
                       GestureDetector(
                         onTap: () async {
                           // network connectivity
-                          var connectivityResult =
-                              await Connectivity().checkConnectivity();
-                          if (connectivityResult != ConnectivityResult.mobile &&
-                              connectivityResult != ConnectivityResult.wifi) {
+                          var connectivityResult = await Connectivity().checkConnectivity();
+                          if (connectivityResult != ConnectivityResult.mobile && connectivityResult != ConnectivityResult.wifi) {
                             showSnackBar('No Internet connectivity');
                             return;
                           }
 
                           if (!emailIdController.text.contains('@')) {
-                            showSnackBar(
-                                'Please provide a valid email address');
+                            showSnackBar('Please provide a valid email address');
                           }
 
                           if (passwordController.text.length < 6) {
-                            showSnackBar(
-                                'Please provide a password of length more than 6');
+                            showSnackBar('Please provide a password of length more than 6');
                           }
                           BuildContext dialogContext;
                           showDialog(
@@ -228,8 +137,7 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             Text(
                               'SignUp here',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 12),
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                             ),
                           ],
                         ),

@@ -43,7 +43,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 Info(infoText: 'Email ID: ', infoData: widget.docSnapshot.data.emailID),
                 Info(infoText: 'Blood group: ', infoData: widget.docSnapshot.data.bloodGroup),
                 Info(infoText: 'Contact number: ', infoData: widget.docSnapshot.data.contact),
-                Info(infoText: 'License number: ', infoData: widget.docSnapshot.data.licenseNumber),
                 SizedBox(
                   height: 20,
                 ),
