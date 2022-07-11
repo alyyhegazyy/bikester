@@ -98,18 +98,6 @@ class ValidationService {
     if (value == null || value.isEmpty) {
       return 'Please enter a valid phone number';
     }
-
-    if (value.length != 10) {
-      return 'Please enter a valid phone number';
-    }
-
-    String pattern = r'^[0-9]*$';
-    RegExp regExp = new RegExp(pattern);
-
-    if (!regExp.hasMatch(value)) {
-      return 'Please enter a valid phone number';
-    }
-
     return null;
   }
 

@@ -35,8 +35,7 @@ class CustomButton extends StatelessWidget {
       child: Center(
         child: Text(
           text,
-          style: TextStyle(
-              color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ),
     );
@@ -50,17 +49,20 @@ class InputFormField extends StatelessWidget {
     @required this.obscure,
     @required this.validator,
     @required this.controller,
+    this.keyboardType = TextInputType.text,
   }) : super(key: key);
 
   final String fieldName;
   final bool obscure;
   final Function validator;
   final TextEditingController controller;
+  final TextInputType keyboardType;
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
+      keyboardType: keyboardType,
       validator: (value) {
         return validator(value);
       },
@@ -85,8 +87,7 @@ class ProgressDialog extends StatelessWidget {
       child: Container(
         margin: EdgeInsets.all(16.0),
         width: double.infinity,
-        decoration: BoxDecoration(
-            color: Colors.white, borderRadius: BorderRadius.circular(4.0)),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4.0)),
         child: Padding(
           padding: EdgeInsets.all(16),
           child: Row(
@@ -117,11 +118,7 @@ class InputTextField extends StatelessWidget {
   final Icon icon;
   final bool obscure;
   final TextEditingController controller;
-  InputTextField(
-      {@required this.label,
-      @required this.icon,
-      @required this.controller,
-      this.obscure});
+  InputTextField({@required this.label, @required this.icon, @required this.controller, this.obscure});
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -270,7 +267,9 @@ class ConfirmSheetButton extends StatelessWidget {
 
 class CustomBackButton extends StatelessWidget {
   final String pageHeader;
-  CustomBackButton({@required this.pageHeader});
+  final isNeedToShowBackButton;
+
+  CustomBackButton({@required this.pageHeader, this.isNeedToShowBackButton = true});
 
   @override
   Widget build(BuildContext context) {
@@ -278,30 +277,31 @@ class CustomBackButton extends StatelessWidget {
       padding: const EdgeInsets.only(top: 45),
       child: Row(
         children: [
-          GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-            },
-            child: Container(
-              width: 35,
-              height: 35,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.grey,
+          if (isNeedToShowBackButton)
+            GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: Container(
+                width: 35,
+                height: 35,
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Colors.grey,
+                  ),
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(40),
+                  ),
                 ),
-                borderRadius: BorderRadius.all(
-                  Radius.circular(40),
-                ),
-              ),
-              child: Align(
-                alignment: Alignment.center,
-                child: Icon(
-                  Icons.arrow_back_rounded,
-                  size: 20,
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Icon(
+                    Icons.arrow_back_rounded,
+                    size: 20,
+                  ),
                 ),
               ),
             ),
-          ),
           Expanded(
             child: Center(
               child: Text(

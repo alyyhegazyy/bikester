@@ -4,6 +4,7 @@ import 'package:vehicle_sharing_app/models/user.dart';
 import 'package:vehicle_sharing_app/screens/home_page.dart';
 import 'package:vehicle_sharing_app/services/firebase_services.dart';
 import 'package:vehicle_sharing_app/services/validation_services.dart';
+import 'package:vehicle_sharing_app/widgets/loading_wrapper.dart';
 import 'package:vehicle_sharing_app/widgets/widgets.dart';
 
 class CompleteProfile extends StatefulWidget {
@@ -18,8 +19,6 @@ class _CompleteProfileState extends State<CompleteProfile> {
   TextEditingController _ageController = TextEditingController();
   TextEditingController _bloodController = TextEditingController();
   TextEditingController _contactController = TextEditingController();
-
-  // String _imageUrl;
 
   AppUser user = AppUser();
 
@@ -49,56 +48,10 @@ class _CompleteProfileState extends State<CompleteProfile> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // GestureDetector(
-                    //   onTap: () async {
-                    //     String image = await Navigator.push(
-                    //       context,
-                    //       MaterialPageRoute(
-                    //         builder: (context) {
-                    //           return ImageSelectAndCrop();
-                    //         },
-                    //       ),
-                    //     ) as String;
-                    //
-                    //     setState(() {
-                    //       _imageUrl = image;
-                    //     });
-                    //   },
-                    //   child: Container(
-                    //     width: 0.4 * deviceSize.width,
-                    //     height: 0.4 * deviceSize.width,
-                    //     child: Center(
-                    //       child: (_imageUrl != null)
-                    //           ? CachedNetworkImage(
-                    //               imageUrl: _imageUrl,
-                    //               imageBuilder: (context, imageProvider) =>
-                    //                   CircleAvatar(
-                    //                 backgroundImage: imageProvider,
-                    //                 radius: 0.2 * deviceSize.width,
-                    //               ),
-                    //               progressIndicatorBuilder:
-                    //                   (context, url, downloadProgress) =>
-                    //                       CircularProgressIndicator(
-                    //                           value: downloadProgress.progress),
-                    //               errorWidget: (context, url, error) => Icon(
-                    //                 Icons.error,
-                    //                 size: 40.0,
-                    //               ),
-                    //             )
-                    //           : CircleAvatar(
-                    //               radius: 0.2 * deviceSize.width,
-                    //               child: Icon(
-                    //                 Icons.person,
-                    //                 size: 40.0,
-                    //               ),
-                    //             ),
-                    //     ),
-                    //   ),
-                    // ),
                     CustomBackButton(
                       pageHeader: 'Complete your profile',
+                      isNeedToShowBackButton: false,
                     ),
-
                     SizedBox(
                       height: 20,
                     ),
@@ -116,6 +69,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
                       obscure: false,
                       validator: ValidationService().ageValidator,
                       controller: _ageController,
+                      keyboardType: TextInputType.number,
                     ),
                     SizedBox(
                       height: 0.03 * deviceSize.height,
@@ -134,65 +88,36 @@ class _CompleteProfileState extends State<CompleteProfile> {
                       obscure: false,
                       validator: ValidationService().contactValidator,
                       controller: _contactController,
+                      keyboardType: TextInputType.number,
                     ),
                     SizedBox(
                       height: 0.05 * deviceSize.height,
                     ),
                     GestureDetector(
                       onTap: () async {
-                        // if (_formKey.currentState.validate() &&
-                        //     _imageUrl != null) {
-                        //   ///Tell the user that process has started
-                        //   Scaffold.of(context).showSnackBar(
-                        //       SnackBar(content: Text('Processing')));
-                        //
-                        //   ///Testing url
-                        //   print(_imageUrl);
-                        //
-                        //   ///Initialize User after successful validation of fields
-                        //   initAppUser();
-                        //
-                        //   ///Make the call to upload user data
-                        //   String isComplete = await firebaseFunctions
-                        //       .uploadUserData(user.toMap());
-                        //
-                        //   ///Check if it was uploaded successfully or else show the error
-                        //   if (isComplete == 'true') {
-                        //     Navigator.push(
-                        //       context,
-                        //       MaterialPageRoute(
-                        //         builder: (context) {
-                        //           return HomePage();
-                        //         },
-                        //       ),
-                        //     );
-                        //   } else {
-                        //     Scaffold.of(context).showSnackBar(
-                        //         SnackBar(content: Text(isComplete)));
-                        //   }
-                        // }
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Processing')));
-                        initAppUser();
-                        String isComplete = await firebaseFunctions.uploadUserData(user.toMap());
-                        if (isComplete == 'true') {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) {
-                                return HomePage();
-                              },
-                            ),
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(isComplete)));
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) {
-                                return CompleteProfile();
-                              },
-                            ),
-                          );
+                        if (_formKey.currentState.validate()) {
+                          ///Tell the user that process has started
+                          Scaffold.of(context).showSnackBar(SnackBar(content: Text('Processing')));
+
+                          ///Initialize User after successful validation of fields
+                          initAppUser();
+
+                          ///Make the call to upload user data
+                          String isComplete = await firebaseFunctions.uploadUserData(user.toMap());
+
+                          ///Check if it was uploaded successfully or else show the error
+                          if (isComplete == 'true') {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return HomePage();
+                                },
+                              ),
+                            );
+                          } else {
+                            Scaffold.of(context).showSnackBar(SnackBar(content: Text(isComplete)));
+                          }
                         }
                       },
                       child: CustomButton(
