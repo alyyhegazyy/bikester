@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:vehicle_sharing_app/models/ride_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
@@ -18,6 +19,7 @@ import 'package:vehicle_sharing_app/notifier/station_bloc.dart';
 import 'package:vehicle_sharing_app/screens/profile_page.dart';
 import 'package:vehicle_sharing_app/screens/ride_history_page.dart';
 import 'package:vehicle_sharing_app/screens/search_dropOff.dart';
+import 'package:vehicle_sharing_app/screens/qr_code_screen.dart';
 import 'package:vehicle_sharing_app/services/authentication_service.dart';
 import 'package:vehicle_sharing_app/services/firebase_services.dart';
 import 'package:vehicle_sharing_app/widgets/single_station.dart';
@@ -774,19 +776,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                     Expanded(
                                       child: GestureDetector(
                                         onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(builder: (context) {
-                                              // return CarList(
-                                              //   initialLocation: initialLocation,
-                                              //   finalDestination: finalDestination,
-                                              //   carlist: nearbyCarId,
-                                              //   cost: ((tripDirectionDetails != null) ? AssistantMethods.calculateFares(tripDirectionDetails) : 0),
-                                              //   pickupDate: "${selectedPickupDate.toLocal()}".split(' ')[0],
-                                              //   dropOffDate: "${selectedDropOffDate.toLocal()}".split(' ')[0],
-                                              // );
-                                            }),
-                                          );
+                                          Navigator.push(context, MaterialPageRoute(builder: (context) {
+                                            return QrCodeScreen(
+                                              rideModel: RideModel.fromMap({
+                                                'startingAddress': Provider.of<StationBloc>(context, listen: false).selectedStartStation.address,
+                                                'endingAddress': Provider.of<StationBloc>(context, listen: false).selectedEndStation.address,
+                                                'cost': AssistantMethods.calculateFares(tripDirectionDetails),
+                                                'distance': tripDirectionDetails.distanceText,
+                                              }),
+                                            );
+                                          }));
                                         },
                                         child: CustomButton(
                                           text: 'Next',

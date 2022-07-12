@@ -1,23 +1,17 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:toast/toast.dart';
-import 'package:vehicle_sharing_app/globalvariables.dart';
-import 'package:vehicle_sharing_app/models/user.dart';
+import 'package:vehicle_sharing_app/models/ride_model.dart';
 import 'package:vehicle_sharing_app/screens/ride_history_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class PaymentPage extends StatefulWidget {
-  final String amount;
-  final AsyncSnapshot<VehicleUser> docSnapshot;
-  String finalDestination;
-  String initialLocation;
-  final String bookedCar;
-  final String pickupDate;
-  final String dropOffDate;
+import 'home_page.dart';
 
-  PaymentPage({@required this.amount, @required this.bookedCar, @required this.docSnapshot, @required this.finalDestination, @required this.initialLocation, @required this.pickupDate, @required this.dropOffDate});
+class PaymentPage extends StatefulWidget {
+  final RideModel rideModel;
+  PaymentPage({@required this.rideModel});
+
   @override
   _PaymentPageState createState() => _PaymentPageState();
 }
@@ -29,68 +23,55 @@ class _PaymentPageState extends State<PaymentPage> {
   void initState() {
     super.initState();
     razorpay = new Razorpay();
-
     razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, handlerPaymentSuccess);
     razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, handlerErrorFailure);
     razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, handlerExternalWallet);
-
     openCheckOut();
   }
-  //TODO : Remove RAZORPAY KEY Afterwards
-  // rzp_test_l8yCRSz3UfiXKB
-  // qKex1KtIwjUAfxYJtZVUUjaw
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     razorpay.clear();
   }
 
   void handlerPaymentSuccess() {
     Toast.show('Payment Successful', context);
-    print('handlerPaymentSuccess');
-    // saveUserHistory();
-  }
-
-  void saveUserHistory() {
-    print("BookedCar :: " + widget.bookedCar);
-    print("UID :: " + currentFirebaseUser.uid);
-    DatabaseReference dbref = FirebaseDatabase.instance.reference().child('user_history/${currentFirebaseUser.uid}/${widget.bookedCar}');
-
-    Map historyMap = {'ownerId': widget.bookedCar, 'modelName': widget.docSnapshot.data.modelName, 'color': widget.docSnapshot.data.color, 'ownerName': widget.docSnapshot.data.ownerName, 'vehicleNumber': widget.docSnapshot.data.vehicleNumber, 'amount': widget.amount, 'pickUp': widget.initialLocation, 'dropOff': widget.finalDestination, 'pickupDate': widget.pickupDate, 'dropofDate': widget.dropOffDate};
-
-    dbref.set(historyMap).then((value) => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => RideHistory(),
-          ),
-        ));
-  }
-
-  void saveOwnerHistory() {
-    FirebaseFirestore.instance.collection('users').doc(currentFirebaseUser.uid).get().then((value) {
-      DatabaseReference dbref = FirebaseDatabase.instance.reference().child('owner_history/${widget.bookedCar}/${currentFirebaseUser.uid}');
-
-      Map historyMap = {'userName': value.data()['name'], 'age': value.data()['age'], 'pickUp': widget.initialLocation, 'dropOff': widget.finalDestination, 'amount': widget.amount, 'pickupDate': widget.pickupDate, 'dropofDate': widget.dropOffDate};
-
-      dbref.set(historyMap);
-    });
   }
 
   void handlerErrorFailure() {
     Toast.show('Payment Failed', context);
-    print('handlerErrorFailure');
   }
 
-  void handlerExternalWallet() {
-    print('handlerExternalWallet');
+  void handlerExternalWallet() {}
+
+  void saveUserHistory() async {
+    try {
+      await FirebaseFirestore.instance.collection('history').add(<String, dynamic>{
+        'cost': widget.rideModel.cost,
+        'date': DateTime.now().millisecondsSinceEpoch,
+        'distance': widget.rideModel.distance,
+        'startingAddress': widget.rideModel.startingAddress,
+        'endingAddress': widget.rideModel.endingAddress,
+        'createdOn': DateTime.now().millisecondsSinceEpoch,
+        'modifiedOn': DateTime.now().millisecondsSinceEpoch,
+        'userId': FirebaseAuth.instance.currentUser.uid,
+      });
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage()),
+        (route) => false,
+      );
+    } on FirebaseException catch (e) {
+      print(e.message);
+    }
   }
 
-  void openCheckOut() {
+  void openCheckOut() async {
     var options = {
       'key': "rzp_test_l8yCRSz3UfiXKB",
-      'amount': (int.parse(widget.amount) * 100).toString(),
+      'amount': '${double.parse(widget.rideModel.cost) * 100}',
       'description': 'Your ride',
       "prefill": {
         "contact": '9876543210',
@@ -111,7 +92,6 @@ class _PaymentPageState extends State<PaymentPage> {
   @override
   Widget build(BuildContext context) {
     saveUserHistory();
-    saveOwnerHistory();
     return RideHistory();
   }
 }
