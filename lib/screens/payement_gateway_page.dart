@@ -1,8 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:toast/toast.dart';
 import 'package:vehicle_sharing_app/models/ride_model.dart';
+import 'package:vehicle_sharing_app/notifier/station_bloc.dart';
 import 'package:vehicle_sharing_app/screens/ride_history_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -57,6 +59,11 @@ class _PaymentPageState extends State<PaymentPage> {
         'modifiedOn': DateTime.now().millisecondsSinceEpoch,
         'userId': FirebaseAuth.instance.currentUser.uid,
       });
+
+      Provider.of<StationBloc>(context, listen: false).setSelectedStartStation(null);
+      Provider.of<StationBloc>(context, listen: false).setSelectedEndStation(null);
+      Provider.of<StationBloc>(context, listen: false).isStartStationSelected = false;
+      Provider.of<StationBloc>(context, listen: false).isEndStationSelected = false;
 
       Navigator.pushAndRemoveUntil(
         context,
