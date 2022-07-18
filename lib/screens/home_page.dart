@@ -19,7 +19,7 @@ import 'package:vehicle_sharing_app/notifier/station_bloc.dart';
 import 'package:vehicle_sharing_app/screens/profile_page.dart';
 import 'package:vehicle_sharing_app/screens/ride_history_page.dart';
 import 'package:vehicle_sharing_app/screens/search_dropOff.dart';
-import 'package:vehicle_sharing_app/screens/qr_code_screen.dart';
+import 'package:vehicle_sharing_app/screens/unlock_qr_code_screen.dart';
 import 'package:vehicle_sharing_app/services/authentication_service.dart';
 import 'package:vehicle_sharing_app/services/firebase_services.dart';
 import 'package:vehicle_sharing_app/widgets/single_station.dart';
@@ -29,6 +29,7 @@ import '../assistant/fireHelper.dart';
 import '../globalvariables.dart';
 import '../models/nearbyCar.dart';
 import 'login_page.dart';
+import 'my_reviews_page.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -287,11 +288,27 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 child: ListTile(
                   leading: Icon(Icons.history),
                   title: Text(
-                    'History',
-                    // style: TextStyle(fontSize: 16),
+                    'Ride History',
                   ),
                 ),
               ),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) {
+                      return MyReviews();
+                    }),
+                  );
+                },
+                child: ListTile(
+                  leading: Icon(Icons.star),
+                  title: Text(
+                    'My Reviews',
+                  ),
+                ),
+              ),
+
               GestureDetector(
                 onTap: () {
                   context.read<AuthenticationService>().signOut(context);
@@ -777,7 +794,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                       child: GestureDetector(
                                         onTap: () {
                                           Navigator.push(context, MaterialPageRoute(builder: (context) {
-                                            return QrCodeScreen(
+                                            return UnlockQrCodeScreen(
                                               rideModel: RideModel.fromMap({
                                                 'startingAddress': Provider.of<StationBloc>(context, listen: false).selectedStartStation.address,
                                                 'endingAddress': Provider.of<StationBloc>(context, listen: false).selectedEndStation.address,

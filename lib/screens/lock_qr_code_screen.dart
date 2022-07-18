@@ -7,16 +7,16 @@ import 'package:vehicle_sharing_app/screens/payement_gateway_page.dart';
 import 'package:vehicle_sharing_app/widgets/widgets.dart';
 import 'package:vehicle_sharing_app/models/ride_model.dart';
 
-class QrCodeScreen extends StatefulWidget {
+class LockQrCodeScreen extends StatefulWidget {
   final RideModel rideModel;
 
-  const QrCodeScreen({Key key, @required this.rideModel}) : super(key: key);
+  const LockQrCodeScreen({Key key, @required this.rideModel}) : super(key: key);
 
   @override
-  _QrCodeScreenState createState() => _QrCodeScreenState();
+  _LockQrCodeScreenState createState() => _LockQrCodeScreenState();
 }
 
-class _QrCodeScreenState extends State<QrCodeScreen> {
+class _LockQrCodeScreenState extends State<LockQrCodeScreen> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   Barcode result;
   QRViewController controller;
@@ -36,23 +36,30 @@ class _QrCodeScreenState extends State<QrCodeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Lock Your Bike'),
+      ),
       body: Column(
         children: <Widget>[
+          SizedBox(height: 10),
           Expanded(
-            flex: 3,
-            child: QRView(
-              key: qrKey,
-              onQRViewCreated: _onQRViewCreated,
+            flex: 1,
+            child: AspectRatio(
+              aspectRatio: 1,
+              child: QRView(
+                key: qrKey,
+                onQRViewCreated: _onQRViewCreated,
+              ),
             ),
           ),
           Expanded(
-            flex: 2,
+            flex: 1,
             child: Center(
               child: Column(
                 children: [
                   SizedBox(height: 10),
                   Text(
-                    'Scan the code on the bike\'s lock to start the ride',
+                    'Scan again to lock the bike and end the ride.',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -65,9 +72,48 @@ class _QrCodeScreenState extends State<QrCodeScreen> {
                   ),
                   Image.asset(
                     'images/lock.jpg',
-                    height: 120,
+                    height: 100,
                   ),
                   Spacer(),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            'Total Ride - \t',
+                            style: TextStyle(
+                              fontSize: 11,
+                            ),
+                          ),
+                          Text(
+                            '${widget.rideModel.distance}',
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            'Cost of Ride - \t',
+                            style: TextStyle(
+                              fontSize: 11,
+                            ),
+                          ),
+                          Text(
+                            '\$${widget.rideModel.cost}',
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
                   GestureDetector(
                     onTap: () {
                       Navigator.of(context).push(
@@ -78,8 +124,11 @@ class _QrCodeScreenState extends State<QrCodeScreen> {
                         ),
                       );
                     },
-                    child: CustomButton(
-                      text: 'Pay Now',
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: CustomButton(
+                        text: 'Pay Now',
+                      ),
                     ),
                   ),
                   SizedBox(

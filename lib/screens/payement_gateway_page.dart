@@ -5,6 +5,7 @@ import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:toast/toast.dart';
 import 'package:vehicle_sharing_app/models/ride_model.dart';
 import 'package:vehicle_sharing_app/notifier/station_bloc.dart';
+import 'package:vehicle_sharing_app/screens/add_review_page.dart';
 import 'package:vehicle_sharing_app/screens/ride_history_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -67,7 +68,7 @@ class _PaymentPageState extends State<PaymentPage> {
 
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => HomePage()),
+        MaterialPageRoute(builder: (context) => AddReviewPage()),
         (route) => false,
       );
     } on FirebaseException catch (e) {

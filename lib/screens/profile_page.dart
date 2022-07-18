@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:vehicle_sharing_app/models/user.dart';
 import 'package:vehicle_sharing_app/screens/detail_profile_page.dart';
 import 'package:vehicle_sharing_app/screens/login_page.dart';
+import 'package:vehicle_sharing_app/screens/my_reviews_page.dart';
 import 'package:vehicle_sharing_app/screens/owner_history.dart';
 import 'package:vehicle_sharing_app/screens/ride_history_page.dart';
 import 'package:vehicle_sharing_app/services/authentication_service.dart';
@@ -99,6 +100,24 @@ class _ProfilePageState extends State<ProfilePage> {
                         leading: Icon(Icons.car_rental),
                         title: Text(
                           'My Rides',
+                          style: TextStyle(fontSize: 14),
+                        ),
+                        trailing: Icon(Icons.arrow_forward_ios_rounded),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) {
+                            return MyReviews();
+                          }),
+                        );
+                      },
+                      child: ListTile(
+                        leading: Icon(Icons.star),
+                        title: Text(
+                          'My Reviews',
                           style: TextStyle(fontSize: 14),
                         ),
                         trailing: Icon(Icons.arrow_forward_ios_rounded),

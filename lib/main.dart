@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vehicle_sharing_app/dataHandler/appdata.dart';
+import 'package:vehicle_sharing_app/screens/add_review_page.dart';
 import 'package:vehicle_sharing_app/screens/home_page.dart';
 import 'package:vehicle_sharing_app/screens/login_page.dart';
 import 'package:vehicle_sharing_app/screens/onboarding_page.dart';
