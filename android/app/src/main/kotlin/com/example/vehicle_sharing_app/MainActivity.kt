@@ -1,4 +1,4 @@
-package com.example.vehicle_sharing_app
+package com.bikester.app
 
 import io.flutter.embedding.android.FlutterActivity
 

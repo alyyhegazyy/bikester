@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vehicle_sharing_app/dataHandler/appdata.dart';
-import 'package:vehicle_sharing_app/screens/add_review_page.dart';
 import 'package:vehicle_sharing_app/screens/home_page.dart';
 import 'package:vehicle_sharing_app/screens/login_page.dart';
 import 'package:vehicle_sharing_app/screens/onboarding_page.dart';
@@ -31,11 +30,11 @@ Future<void> main() async {
             databaseURL: 'https://flutterfire-cd2f7.firebaseio.com',
           )
         : FirebaseOptions(
-            appId: '1:185156546944:android:a147ce3947dc0df7909165',
-            apiKey: 'AIzaSyBLKVBm3Ke7WsoXvSnD8x08aKMCuQSVP0Y',
-            messagingSenderId: '185156546944',
-            projectId: 'aqua-kingdom',
-            databaseURL: 'https://aqua-kingdom-default-rtdb.firebaseio.com',
+            appId: '1:345376185565:android:6a4af9507c2103694f4f34',
+            apiKey: 'AIzaSyAIbAkWiUW7Q1recjEIsqVb8pwSqx2R7zw',
+            messagingSenderId: '345376185565',
+            projectId: 'bikester-6e598',
+            databaseURL: 'https://bikester-6e598-default-rtdb.firebaseio.com',
           ),
   );
 

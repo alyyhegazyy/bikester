@@ -1,33 +1,33 @@
 {
   "project_info": {
-    "project_number": "185156546944",
-    "project_id": "aqua-kingdom",
-    "storage_bucket": "aqua-kingdom.appspot.com"
+    "project_number": "345376185565",
+    "project_id": "bikester-6e598",
+    "storage_bucket": "bikester-6e598.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:185156546944:android:a147ce3947dc0df7909165",
+        "mobilesdk_app_id": "1:345376185565:android:6a4af9507c2103694f4f34",
         "android_client_info": {
-          "package_name": "com.example.vehicle_sharing_app"
+          "package_name": "com.bikester.app"
         }
       },
       "oauth_client": [
         {
-          "client_id": "185156546944-qk2oo29boo70qod0dc33va655d2o3kde.apps.googleusercontent.com",
+          "client_id": "345376185565-ga2rnsej8qupoc1k440c45bucp9lq0g9.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBLKVBm3Ke7WsoXvSnD8x08aKMCuQSVP0Y"
+          "current_key": "AIzaSyAIbAkWiUW7Q1recjEIsqVb8pwSqx2R7zw"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "185156546944-qk2oo29boo70qod0dc33va655d2o3kde.apps.googleusercontent.com",
+              "client_id": "345376185565-ga2rnsej8qupoc1k440c45bucp9lq0g9.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
