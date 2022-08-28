@@ -39,6 +39,7 @@ class FirebaseFunctions {
   final uid = FirebaseAuth.instance.currentUser.uid;
 
   Future<AppUser> getUser() async {
+    print('uid: $uid');
     final userDoc = await collectionReference.doc(uid).get();
 
     if (userDoc.exists) {
