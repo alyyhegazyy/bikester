@@ -59,7 +59,7 @@ class _LockQrCodeScreenState extends State<LockQrCodeScreen> {
                 children: [
                   SizedBox(height: 10),
                   Text(
-                    'Scan again to lock the bike and end the ride.',
+                    'Please take a picture of the locked bike.',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

@@ -123,7 +123,7 @@ class _OnboradingPageState extends State<OnboradingPage> {
             ),
           ),
         ],
-      ),
+      ), 
       // doneColor: kPrimaryColor,
       showDoneButton: false,
       dotsDecorator: DotsDecorator(

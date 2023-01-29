@@ -21,15 +21,6 @@ class AuthenticationService {
       MaterialPageRoute(builder: (context) => LoginPage()),
       (Route<dynamic> route) => false,
     );
-
-    // Navigator.pushAndRemoveUntil(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) {
-    //       return LoginPage();
-    //     },
-    //   ),
-    // );
   }
 
   /// There are a lot of different ways on how you can do exception handling.
@@ -44,7 +35,6 @@ class AuthenticationService {
       return e.message;
     }
   }
-
   /// There are a lot of different ways on how you can do exception handling.
   /// This is to make it as easy as possible but a better way would be to
   /// use your own custom class that would take the exception and return better

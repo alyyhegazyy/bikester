@@ -31,15 +31,4 @@ class AppTheme {
     end: Alignment.centerLeft,
     begin: Alignment.centerRight,
   );
-
-  // static InputDecoration inputDecoration = const InputDecoration(
-  //   contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-  //   hintText: 'hint..',
-  //   hintStyle: TextStyle(
-  //     color: Colors.grey,
-  //   ),
-  //   fillColor: Colors.white,
-  //   filled: true,
-  //   border: OutlineInputBorder(),
-  // );
 }
